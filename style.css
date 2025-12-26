@@ -76,6 +76,8 @@ button {
 .carta {
   height: 220px;
   perspective: 1000px;
+  position: relative;
+  margin-top: 10px;
 }
 
 .cara {
@@ -88,6 +90,8 @@ button {
   align-items: center;
   backface-visibility: hidden;
   transition: transform .8s;
+  padding: 18px;
+  text-align: center;
 }
 
 .frente { background:#2d2a55; }
@@ -115,44 +119,26 @@ button {
   cursor: pointer;
   background: rgba(255,255,255,.15);
   transition: all .25s;
+  user-select: none;
 }
 
-.voto-card:hover {
-  transform: scale(1.03);
-}
+.voto-card:hover { transform: scale(1.03); }
 
 .voto-card.activo {
   background: linear-gradient(135deg,#7f5af0,#00ffcc);
   color: #0e0b1f;
   transform: scale(1.05);
 }
+
 /* Scroll custom */
-.scroll::-webkit-scrollbar {
-  width: 6px;
-}
-
-.scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
+.scroll::-webkit-scrollbar { width: 6px; }
+.scroll::-webkit-scrollbar-track { background: transparent; }
 .scroll::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #7f5af0, #00ffcc);
   border-radius: 10px;
 }
-
 .scroll::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #00ffcc, #7f5af0);
 }
-
-/* Firefox */
-.scroll {
-  scrollbar-width: thin;
-  scrollbar-color: #7f5af0 transparent;
-}
-.scroll {
-  scroll-behavior: smooth;
-  overscroll-behavior: contain;
-}
-
-
-
+.scroll { scrollbar-width: thin; scrollbar-color: #7f5af0 transparent; }
+.scroll { scroll-behavior: smooth; overscroll-behavior: contain; }
