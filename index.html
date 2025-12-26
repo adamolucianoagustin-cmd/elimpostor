@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
   <title>Juego del Impostor</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,17 +16,15 @@
 
     <h1>Juego del Impostor</h1>
 
-    <!-- MODO ONLINE (VA EN EL BODY, NO EN HEAD) -->
     <h3>Modo online</h3>
-    <button onclick="crearSala()">Crear sala online</button>
+    <button onclick="crearSala()">Crear sala</button>
 
     <input id="codigoSala" placeholder="Código de sala">
     <button onclick="unirseSala()">Unirse a sala</button>
 
-    <p id="codigoActual" style="margin-top:10px;font-weight:bold;"></p>
+    <p id="codigoActual"></p>
 
-    <!-- JUGADORES -->
-    <input id="nombreJugador" placeholder="Nombre del jugador">
+    <input id="nombreJugador" placeholder="Tu nombre">
     <button onclick="agregarJugador()">Agregar jugador</button>
 
     <h3>Impostores</h3>
@@ -39,24 +38,10 @@
     <div id="listaCategoriasInicio" class="categorias"></div>
 
     <button onclick="iniciarJuego()">Iniciar juego</button>
-    <button onclick="abrirCategorias()">Editar categorías</button>
 
     <h3>Jugadores</h3>
     <ul id="listaJugadores"></ul>
 
-  </div>
-</div>
-
-<!-- CATEGORÍAS -->
-<div id="pantallaCategorias" class="pantalla">
-  <div class="card scroll">
-    <h2>Categorías</h2>
-
-    <input id="nombreCategoria" placeholder="Nombre">
-    <textarea id="palabrasCategoria" placeholder="Palabras separadas por coma"></textarea>
-
-    <button onclick="agregarCategoria()">Agregar</button>
-    <button onclick="volverInicio()">Volver</button>
   </div>
 </div>
 
@@ -95,8 +80,6 @@
   <div class="card">
     <h2 id="resultadoTexto"></h2>
     <p id="detalleFinal"></p>
-
-    <button onclick="nuevaRonda()">Nueva ronda</button>
     <button onclick="volverInicio()">Volver al inicio</button>
   </div>
 </div>
