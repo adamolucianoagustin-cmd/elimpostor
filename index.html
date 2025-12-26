@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Juego del Impostor</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
@@ -13,34 +13,38 @@
 <!-- INICIO -->
 <div id="pantallaInicio" class="pantalla activa">
   <div class="card scroll">
+
     <h1>Juego del Impostor</h1>
 
+    <h3>Modo online</h3>
     <button onclick="crearSala()">Crear sala</button>
+
     <input id="codigoSala" placeholder="Código de sala">
     <button onclick="unirseSala()">Unirse</button>
 
     <p id="codigoActual"></p>
 
     <input id="nombreJugador" placeholder="Tu nombre">
-    <button onclick="agregarJugador()">Entrar</button>
+    <button onclick="agregarJugador()">Entrar a la sala</button>
 
     <h3>Impostores</h3>
     <select id="cantidadImpostores">
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
+      <option value="1">1 impostor</option>
+      <option value="2">2 impostores</option>
     </select>
 
     <h3>Categoría</h3>
     <div id="listaCategoriasInicio" class="categorias"></div>
 
-    <button onclick="iniciarJuego()">Iniciar juego (HOST)</button>
+    <button onclick="iniciarJuego()">Iniciar juego</button>
 
+    <h3>Jugadores</h3>
     <ul id="listaJugadores"></ul>
+
   </div>
 </div>
 
-<!-- ROL -->
+<!-- ROLES -->
 <div id="pantallaRol" class="pantalla">
   <div class="card">
     <h2 id="textoRol"></h2>
@@ -51,21 +55,23 @@
 <!-- DISCUSIÓN -->
 <div id="pantallaDiscusion" class="pantalla">
   <div class="card scroll">
+
     <h2>Discusión</h2>
     <h1 id="timer">03:00</h1>
 
-    <div id="chat"></div>
-    <input id="mensajeChat" placeholder="Escribí algo">
+    <div id="chat" class="chat"></div>
+
+    <input id="mensajeChat" placeholder="Escribí un mensaje">
     <button onclick="enviarMensaje()">Enviar</button>
 
-    <button onclick="irAVotacion()">Ir a votación (HOST)</button>
+    <button onclick="irAVotacion()">Ir a votación</button>
   </div>
 </div>
 
 <!-- VOTACIÓN -->
 <div id="pantallaVotacion" class="pantalla">
   <div class="card">
-    <h2>Votar</h2>
+    <h2>Votá al impostor</h2>
     <div id="listaVotos"></div>
   </div>
 </div>
@@ -75,8 +81,7 @@
   <div class="card">
     <h2 id="resultadoTexto"></h2>
     <p id="detalleFinal"></p>
-    <button onclick="nuevaRonda()">Nueva ronda</button>
-    <button onclick="volverLobby()">Volver al lobby</button>
+    <button onclick="volverInicio()">Volver al inicio</button>
   </div>
 </div>
 
