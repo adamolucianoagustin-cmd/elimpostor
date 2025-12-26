@@ -119,24 +119,22 @@ function renderizarVotos() {
 }
 
 function votar(jugador) {
-  votos[jugador] = (votos[jugador] || 0) + 1;
-  if (Object.values(votos).reduce((a, b) => a + b, 0) >= jugadores.length) {
-    mostrarResultado();
-  }
+  mostrarResultado(jugador);
 }
 
 // ---------------- FINAL ----------------
-function mostrarResultado() {
+function mostrarResultado(jugadorVotado) {
   mostrarPantalla("pantallaFinal");
-
-  const ganador = Object.keys(votos).reduce((a, b) =>
-    votos[a] > votos[b] ? a : b
-  );
 
   const impostor = jugadores[impostorIndex];
 
-  document.getElementById("resultadoTexto").textContent =
-    ganador === impostor ? "¡Civiles ganaron!" : "¡El impostor ganó!";
+  if (jugadorVotado === impostor) {
+    document.getElementById("resultadoTexto").textContent =
+      "¡Civiles ganaron! 🎉";
+  } else {
+    document.getElementById("resultadoTexto").textContent =
+      "¡El impostor ganó! 😈";
+  }
 
   document.getElementById("detalleFinal").textContent =
     `El impostor era ${impostor}. La palabra era "${palabraSecreta}".`;
@@ -193,3 +191,4 @@ function volverInicio() {
 }
 
 window.onload = cargarCategorias;
+
