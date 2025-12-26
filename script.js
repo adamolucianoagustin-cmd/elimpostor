@@ -7,7 +7,7 @@ let categorias = {};
 
 let tiempo = 180;
 let intervalo;
-let votos = {};
+let votacionActiva = true;
 
 // ---------------- PANTALLAS ----------------
 function mostrarPantalla(id) {
@@ -61,12 +61,12 @@ function mostrarRol() {
 
   carta.onclick = () => {
     carta.classList.add("volteada");
-    if (turnoActual === impostorIndex) {
-      mensaje.textContent = jugadores[turnoActual] + ": SOS EL IMPOSTOR 😈";
-      dorso.classList.add("impostor");
-    } else {
-      mensaje.textContent = jugadores[turnoActual] + ": " + palabraSecreta;
-    }
+    mensaje.textContent =
+      turnoActual === impostorIndex
+        ? jugadores[turnoActual] + ": SOS EL IMPOSTOR 😈"
+        : jugadores[turnoActual] + ": " + palabraSecreta;
+
+    if (turnoActual === impostorIndex) dorso.classList.add("impostor");
   };
 }
 
@@ -101,8 +101,8 @@ function actualizarTimer() {
 // ---------------- VOTACIÓN ----------------
 function irAVotacion() {
   clearInterval(intervalo);
+  votacionActiva = true;
   mostrarPantalla("pantallaVotacion");
-  votos = {};
   renderizarVotos();
 }
 
@@ -119,6 +119,8 @@ function renderizarVotos() {
 }
 
 function votar(jugador) {
+  if (!votacionActiva) return;
+  votacionActiva = false;
   mostrarResultado(jugador);
 }
 
@@ -128,13 +130,10 @@ function mostrarResultado(jugadorVotado) {
 
   const impostor = jugadores[impostorIndex];
 
-  if (jugadorVotado === impostor) {
-    document.getElementById("resultadoTexto").textContent =
-      "¡Civiles ganaron! 🎉";
-  } else {
-    document.getElementById("resultadoTexto").textContent =
-      "¡El impostor ganó! 😈";
-  }
+  document.getElementById("resultadoTexto").textContent =
+    jugadorVotado === impostor
+      ? "¡Civiles ganaron! 🎉"
+      : "¡El impostor ganó! 😈";
 
   document.getElementById("detalleFinal").textContent =
     `El impostor era ${impostor}. La palabra era "${palabraSecreta}".`;
@@ -191,4 +190,3 @@ function volverInicio() {
 }
 
 window.onload = cargarCategorias;
-
