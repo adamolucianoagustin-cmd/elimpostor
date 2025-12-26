@@ -11,16 +11,15 @@ let roles = {};
 let tiempo = 180;
 let intervalo;
 
-// ---------------- PANTALLAS ----------------
+// ---------- PANTALLAS ----------
 function mostrarPantalla(id) {
   document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa"));
   document.getElementById(id).classList.add("activa");
 }
 
-// ---------------- SALAS ----------------
+// ---------- SALAS ----------
 function generarCodigoSala() {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  return Array.from({length:5}, () => chars[Math.floor(Math.random()*chars.length)]).join("");
+  return Math.random().toString(36).substring(2,7).toUpperCase();
 }
 
 function crearSala() {
@@ -40,25 +39,20 @@ function unirseSala() {
   const codigo = codigoSala.value.trim().toUpperCase();
   if (!codigo) return;
 
-  db.collection("salas").doc(codigo).get().then(doc => {
-    if (!doc.exists) return alert("Sala no encontrada");
-    salaId = codigo;
-    esHost = false;
-    codigoActual.textContent = "Sala: " + salaId;
-    escucharSala();
-  });
+  salaId = codigo;
+  esHost = false;
+  codigoActual.textContent = "Sala: " + salaId;
+  escucharSala();
 }
 
-// ---------------- JUGADORES ----------------
+// ---------- JUGADORES ----------
 function agregarJugador() {
-  if (!salaId) return alert("Creá o uníte a una sala");
-  const nombre = nombreJugador.value.trim();
-  if (!nombre) return;
-
-  miNombre = nombre;
+  if (!salaId) return alert("Entrá a una sala");
+  miNombre = nombreJugador.value.trim();
+  if (!miNombre) return;
 
   db.collection("salas").doc(salaId).update({
-    jugadores: firebase.firestore.FieldValue.arrayUnion(nombre)
+    jugadores: firebase.firestore.FieldValue.arrayUnion(miNombre)
   });
 }
 
@@ -66,18 +60,17 @@ function mostrarJugadores() {
   listaJugadores.innerHTML = jugadores.map(j => `<li>${j}</li>`).join("");
 }
 
-// ---------------- JUEGO ----------------
+// ---------- JUEGO ----------
 function iniciarJuego() {
-  if (!esHost) return alert("Solo el host inicia");
+  if (!esHost) return;
 
   const cant = parseInt(cantidadImpostores.value);
-  const mezclados = [...jugadores].sort(() => Math.random() - 0.5);
+  const mix = [...jugadores].sort(() => Math.random() - 0.5);
 
   roles = {};
-  mezclados.forEach((j,i) => roles[j] = i < cant ? "impostor" : "civil");
+  mix.forEach((j,i)=> roles[j] = i < cant ? "impostor" : "civil");
 
-  const palabras = categorias[categoriaSeleccionada];
-  palabra = palabras[Math.floor(Math.random() * palabras.length)];
+  palabra = categorias[categoriaSeleccionada][Math.floor(Math.random()*categorias[categoriaSeleccionada].length)];
 
   db.collection("salas").doc(salaId).update({
     fase: "roles",
@@ -93,10 +86,11 @@ function confirmarRol() {
   });
 }
 
-// ---------------- DISCUSIÓN ----------------
+// ---------- DISCUSIÓN ----------
 function iniciarDiscusion() {
   mostrarPantalla("pantallaDiscusion");
   tiempo = 180;
+  clearInterval(intervalo);
 
   intervalo = setInterval(() => {
     timer.textContent =
@@ -105,7 +99,7 @@ function iniciarDiscusion() {
   }, 1000);
 }
 
-// ---------------- CHAT ----------------
+// ---------- CHAT ----------
 function enviarMensaje() {
   const texto = mensajeChat.value.trim();
   if (!texto) return;
@@ -119,30 +113,30 @@ function enviarMensaje() {
   mensajeChat.value = "";
 }
 
-// ---------------- VOTACIÓN ----------------
+// ---------- VOTACIÓN ----------
 function irAVotacion() {
   clearInterval(intervalo);
   db.collection("salas").doc(salaId).update({ fase: "votacion", votos: {} });
 }
 
-function votar(nombre) {
+function votar(nombre, el) {
+  document.querySelectorAll(".voto-card").forEach(v => v.classList.remove("activo"));
+  el.classList.add("activo");
+
   db.collection("salas").doc(salaId).update({
     [`votos.${miNombre}`]: nombre
   });
 }
 
-// ---------------- RESULTADO ----------------
+// ---------- RESULTADO ----------
 function mostrarResultado(votos) {
   const conteo = {};
   Object.values(votos).forEach(v => conteo[v] = (conteo[v] || 0) + 1);
   const votado = Object.keys(conteo).sort((a,b)=>conteo[b]-conteo[a])[0];
-
-  const impostores = Object.keys(roles).filter(j => roles[j] === "impostor");
+  const impostores = Object.keys(roles).filter(j => roles[j]==="impostor");
 
   resultadoTexto.textContent =
-    impostores.includes(votado)
-      ? "¡Civiles ganaron! 🎉"
-      : "¡Impostores ganaron! 😈";
+    impostores.includes(votado) ? "¡Civiles ganaron! 🎉" : "¡Impostores ganaron! 😈";
 
   detalleFinal.textContent =
     `Impostores: ${impostores.join(", ")} | Palabra: "${palabra}"`;
@@ -150,7 +144,23 @@ function mostrarResultado(votos) {
   mostrarPantalla("pantallaFinal");
 }
 
-// ---------------- FIREBASE LISTENER ----------------
+// ---------- NUEVA RONDA / SALIR ----------
+function nuevaRonda() {
+  if (!esHost) return;
+
+  db.collection("salas").doc(salaId).update({
+    fase: "inicio",
+    confirmados: [],
+    votos: {}
+  });
+}
+
+function salirInicio() {
+  salaId = null;
+  mostrarPantalla("pantallaInicio");
+}
+
+// ---------- LISTENERS ----------
 function escucharSala() {
   db.collection("salas").doc(salaId).onSnapshot(doc => {
     const d = doc.data();
@@ -158,11 +168,9 @@ function escucharSala() {
     mostrarJugadores();
 
     if (d.fase === "roles") {
-      palabra = d.palabra;
-      roles = d.roles;
       mostrarPantalla("pantallaRol");
       textoRol.textContent =
-        roles[miNombre] === "impostor" ? "SOS EL IMPOSTOR 😈" : `PALABRA: ${palabra}`;
+        d.roles[miNombre] === "impostor" ? "SOS EL IMPOSTOR 😈" : `PALABRA: ${d.palabra}`;
 
       if (esHost && d.confirmados?.length === jugadores.length) {
         db.collection("salas").doc(salaId).update({ fase: "discusion" });
@@ -174,7 +182,7 @@ function escucharSala() {
     if (d.fase === "votacion") {
       mostrarPantalla("pantallaVotacion");
       listaVotos.innerHTML = jugadores.map(j =>
-        `<div class="voto-card" onclick="votar('${j}')">${j}</div>`
+        `<div class="voto-card" onclick="votar('${j}',this)">${j}</div>`
       ).join("");
     }
 
@@ -189,13 +197,14 @@ function escucharSala() {
       chat.innerHTML = snap.docs.map(d =>
         `<p><b>${d.data().autor}:</b> ${d.data().texto}</p>`
       ).join("");
+      chat.scrollTop = chat.scrollHeight;
     });
 }
 
-// ---------------- CATEGORÍAS ----------------
+// ---------- CATEGORÍAS ----------
 db.collection("categorias").onSnapshot(snap => {
-  listaCategoriasInicio.innerHTML = "";
   categorias = {};
+  listaCategoriasInicio.innerHTML = "";
 
   snap.forEach(doc => {
     categorias[doc.id] = doc.data().palabras;
