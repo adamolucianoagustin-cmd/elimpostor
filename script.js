@@ -1,16 +1,17 @@
 let salaId = null;
 let esHost = false;
+let miNombre = "";
 
 let jugadores = [];
-let turnoActual = 0;
+let impostores = [];
 let palabraSecreta = "";
 let categorias = {};
 let categoriaSeleccionada = null;
 
-let impostores = [];
+let turnoActual = 0;
 let tiempo = 180;
 let intervalo;
-let votacionActiva = true;
+let votos = {};
 
 // ---------------- PANTALLAS ----------------
 function mostrarPantalla(id) {
@@ -18,122 +19,95 @@ function mostrarPantalla(id) {
   document.getElementById(id).classList.add("activa");
 }
 
-// ---------------- ONLINE ----------------
+// ---------------- SALAS ----------------
 function generarCodigoSala() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let codigo = "";
-  for (let i = 0; i < 5; i++) codigo += chars[Math.floor(Math.random() * chars.length)];
-  return codigo;
+  return Array.from({length:5}, () => chars[Math.floor(Math.random()*chars.length)]).join("");
 }
 
 function crearSala() {
-  if (salaId) return;
   salaId = generarCodigoSala();
   esHost = true;
 
   db.collection("salas").doc(salaId).set({
     jugadores: [],
-    creada: firebase.firestore.FieldValue.serverTimestamp()
+    fase: "inicio"
   });
 
-  document.getElementById("codigoActual").textContent = "Código de sala: " + salaId;
+  document.getElementById("codigoActual").textContent = "Código: " + salaId;
   escucharSala();
 }
 
 function unirseSala() {
   const codigo = document.getElementById("codigoSala").value.trim().toUpperCase();
-  if (!codigo) return alert("Ingresá un código");
+  if (!codigo) return;
 
   db.collection("salas").doc(codigo).get().then(doc => {
     if (!doc.exists) return alert("Sala no encontrada");
-
     salaId = codigo;
     esHost = false;
-
-    document.getElementById("codigoActual").textContent = "Conectado a sala: " + salaId;
-    mostrarPantalla("pantallaInicio");
+    document.getElementById("codigoActual").textContent = "Sala: " + salaId;
     escucharSala();
   });
 }
 
-function escucharSala() {
-  db.collection("salas").doc(salaId).onSnapshot(doc => {
-    if (!doc.exists) return;
-
-    const data = doc.data();
-    jugadores = data.jugadores || [];
-    mostrarJugadores();
-
-    // Mostrar aviso de sala activa
-    document.getElementById("codigoActual").textContent =
-      "Sala activa: " + salaId + (esHost ? " (Host)" : "");
-  });
-}
-
-
 // ---------------- JUGADORES ----------------
 function agregarJugador() {
-  const input = document.getElementById("nombreJugador");
-  const nombre = input.value.trim();
-  if (!nombre) return alert("Escribí un nombre");
-  if (!salaId) return alert("Primero creá o uníte a una sala");
+  if (!salaId) return alert("Creá o uníte a una sala");
+  const nombre = nombreJugador.value.trim();
+  if (!nombre) return;
+
+  miNombre = nombre;
 
   db.collection("salas").doc(salaId).update({
     jugadores: firebase.firestore.FieldValue.arrayUnion(nombre)
   });
 
-  input.value = "";
+  nombreJugador.value = "";
 }
 
 function mostrarJugadores() {
-  const ul = document.getElementById("listaJugadores");
-  ul.innerHTML = "";
-  jugadores.forEach(j => ul.innerHTML += `<li>${j}</li>`);
+  listaJugadores.innerHTML = jugadores.map(j => `<li>${j}</li>`).join("");
 }
 
 // ---------------- JUEGO ----------------
 function iniciarJuego() {
-  if (!esHost) {
-  alert("Solo el host puede iniciar la partida");
-  return;
-}
+  if (!esHost) return alert("Solo el host inicia");
 
-  if (jugadores.length < 3 || !categoriaSeleccionada) {
-    alert("Faltan jugadores o categoría");
-    return;
-  }
-
-  const cant = parseInt(document.getElementById("cantidadImpostores").value, 10);
+  const cant = parseInt(cantidadImpostores.value);
   impostores = [...jugadores].sort(() => Math.random() - 0.5).slice(0, cant);
+  palabraSecreta = categorias[categoriaSeleccionada][Math.floor(Math.random() * categorias[categoriaSeleccionada].length)];
 
-  const palabras = categorias[categoriaSeleccionada];
-  palabraSecreta = palabras[Math.floor(Math.random() * palabras.length)];
-
-  turnoActual = 0;
-  mostrarRol();
-  mostrarPantalla("pantallaRol");
+  db.collection("salas").doc(salaId).update({
+    fase: "roles",
+    impostores,
+    palabra: palabraSecreta,
+    turno: 0
+  });
 }
 
 function mostrarRol() {
-  const carta = document.getElementById("carta");
-  const mensaje = document.getElementById("mensajeRol");
-  const dorso = document.getElementById("cartaDorso");
-
   carta.classList.remove("volteada");
-  dorso.classList.toggle("impostor", impostores.includes(jugadores[turnoActual]));
-  mensaje.textContent = "";
+  cartaDorso.classList.toggle("impostor", impostores.includes(miNombre));
+  mensajeRol.textContent = "";
 
   carta.onclick = () => {
     carta.classList.add("volteada");
-    mensaje.textContent = impostores.includes(jugadores[turnoActual])
+    mensajeRol.textContent = impostores.includes(miNombre)
       ? "SOS EL IMPOSTOR 😈"
-      : `PALABRA: ${palabraSecreta}`;
+      : palabraSecreta;
   };
 }
 
 function siguienteJugador() {
-  if (++turnoActual < jugadores.length) mostrarRol();
-  else iniciarDiscusion();
+  if (!esHost) return;
+
+  turnoActual++;
+  if (turnoActual < jugadores.length) {
+    db.collection("salas").doc(salaId).update({ turno: turnoActual });
+  } else {
+    db.collection("salas").doc(salaId).update({ fase: "discusion" });
+  }
 }
 
 // ---------------- DISCUSIÓN ----------------
@@ -141,97 +115,87 @@ function iniciarDiscusion() {
   mostrarPantalla("pantallaDiscusion");
   tiempo = 180;
 
-  clearInterval(intervalo);
   intervalo = setInterval(() => {
-    document.getElementById("timer").textContent =
-      `${String(Math.floor(tiempo / 60)).padStart(2, "0")}:${String(tiempo % 60).padStart(2, "0")}`;
-    tiempo--;
-    if (tiempo < 0) irAVotacion();
+    timer.textContent = `${String(Math.floor(tiempo/60)).padStart(2,"0")}:${String(tiempo%60).padStart(2,"0")}`;
+    if (--tiempo < 0) irAVotacion();
   }, 1000);
 }
 
-// ---------------- VOTACIÓN ----------------
+// ---------------- VOTACIÓN ONLINE ----------------
 function irAVotacion() {
   clearInterval(intervalo);
-  votacionActiva = true;
-  mostrarPantalla("pantallaVotacion");
 
-  const div = document.getElementById("listaVotos");
-  div.innerHTML = "";
-
-  jugadores.forEach(j => {
-    const card = document.createElement("div");
-    card.className = "voto-card";
-    card.textContent = j;
-
-    card.onclick = () => {
-      if (!votacionActiva) return;
-      votacionActiva = false;
-      card.classList.add("activo");
-      setTimeout(() => mostrarResultado(j), 600);
-    };
-
-    div.appendChild(card);
+  db.collection("salas").doc(salaId).update({
+    fase: "votacion",
+    votos: {}
   });
 }
 
-// ---------------- FINAL ----------------
-function mostrarResultado(votado) {
+function votar(nombre) {
+  db.collection("salas").doc(salaId).update({
+    [`votos.${miNombre}`]: nombre
+  });
+}
+
+// ---------------- RESULTADO ----------------
+function mostrarResultado(votos) {
+  const conteo = {};
+  Object.values(votos).forEach(v => conteo[v] = (conteo[v] || 0) + 1);
+  const votado = Object.keys(conteo).sort((a,b)=>conteo[b]-conteo[a])[0];
+
+  resultadoTexto.textContent = impostores.includes(votado)
+    ? "¡Civiles ganaron! 🎉"
+    : "¡Impostores ganaron! 😈";
+
+  detalleFinal.textContent = `Impostores: ${impostores.join(", ")} | Palabra: "${palabraSecreta}"`;
   mostrarPantalla("pantallaFinal");
-
-  const gananCiviles = impostores.includes(votado);
-  document.getElementById("resultadoTexto").textContent =
-    gananCiviles ? "¡Civiles ganaron! 🎉" : "¡Los impostores ganaron! 😈";
-
-  document.getElementById("detalleFinal").textContent =
-    `Impostores: ${impostores.join(", ")} | Palabra: "${palabraSecreta}"`;
 }
 
-function nuevaRonda() {
-  iniciarJuego();
-}
+// ---------------- FIREBASE LISTENER ----------------
+function escucharSala() {
+  db.collection("salas").doc(salaId).onSnapshot(doc => {
+    const d = doc.data();
+    jugadores = d.jugadores || [];
+    mostrarJugadores();
 
-// ---------------- CATEGORÍAS (FIREBASE) ----------------
-function cargarCategorias() {
-  db.collection("categorias").onSnapshot(snap => {
-    categorias = {};
-    snap.forEach(doc => categorias[doc.id] = doc.data().palabras);
+    if (d.fase === "roles") {
+      impostores = d.impostores;
+      palabraSecreta = d.palabra;
+      turnoActual = d.turno;
+      mostrarPantalla("pantallaRol");
+      mostrarRol();
+    }
 
-    const div = document.getElementById("listaCategoriasInicio");
-    div.innerHTML = "";
+    if (d.fase === "discusion") iniciarDiscusion();
 
-    Object.keys(categorias).forEach(c => {
-      const b = document.createElement("button");
-      b.textContent = c;
-      b.className = "categoria-btn";
-      b.onclick = () => {
-        categoriaSeleccionada = c;
-        document.querySelectorAll(".categoria-btn").forEach(x => x.classList.remove("activa"));
-        b.classList.add("activa");
-      };
-      div.appendChild(b);
-    });
+    if (d.fase === "votacion") {
+      mostrarPantalla("pantallaVotacion");
+      listaVotos.innerHTML = jugadores.map(j =>
+        `<div class="voto-card" onclick="votar('${j}')">${j}</div>`
+      ).join("");
+    }
+
+    if (d.votos && Object.keys(d.votos).length === jugadores.length) {
+      mostrarResultado(d.votos);
+    }
   });
 }
 
-function agregarCategoria() {
-  const n = nombreCategoria.value.trim();
-  const p = palabrasCategoria.value.trim();
-  if (!n || !p) return;
+// ---------------- CATEGORÍAS ----------------
+db.collection("categorias").onSnapshot(snap => {
+  categorias = {};
+  listaCategoriasInicio.innerHTML = "";
 
-  db.collection("categorias").doc(n).set({
-    palabras: p.split(",").map(x => x.trim()).filter(x => x)
+  snap.forEach(doc => {
+    categorias[doc.id] = doc.data().palabras;
+    const b = document.createElement("button");
+    b.textContent = doc.id;
+    b.className = "categoria-btn";
+    b.onclick = () => {
+      categoriaSeleccionada = doc.id;
+      document.querySelectorAll(".categoria-btn").forEach(x => x.classList.remove("activa"));
+      b.classList.add("activa");
+    };
+    listaCategoriasInicio.appendChild(b);
   });
-
-  nombreCategoria.value = "";
-  palabrasCategoria.value = "";
-}
-
-function abrirCategorias() { mostrarPantalla("pantallaCategorias"); }
-function volverInicio() { mostrarPantalla("pantallaInicio"); }
-
-window.onload = () => {
-  cargarCategorias();
-};
-
-
+});
