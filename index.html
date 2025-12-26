@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head> <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Juego del Impostor</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- PANTALLA INICIO -->
+<div id="pantallaInicio" class="pantalla activa">
+  <div class="card">
+    <h1>Juego del Impostor</h1>
+
+    <label>Nombre del jugador:</label>
+    <input id="nombreJugador" placeholder="Ej: Juan">
+
+    <h3>Elegí una categoría</h3>
+    <div id="listaCategoriasInicio"></div>
+
+    <button onclick="agregarJugador()">Agregar jugador</button>
+    <button onclick="iniciarJuego()">Iniciar juego</button>
+    <button onclick="abrirCategorias()">Editar categorías</button>
+
+    <h2>Jugadores:</h2>
+    <ul id="listaJugadores"></ul>
+  </div>
+</div>
+
+<!-- PANTALLA CATEGORÍAS -->
+<div id="pantallaCategorias" class="pantalla">
+  <div class="card">
+    <h2>Administrar categorías</h2>
+
+    <input id="nombreCategoria" placeholder="Nombre de la categoría">
+    <textarea id="palabrasCategoria" rows="4"
+      placeholder="Palabras separadas por coma"></textarea>
+
+    <button onclick="agregarCategoria()">Agregar categoría</button>
+    <button onclick="volverInicio()">Volver</button>
+
+    <h3>Categorías existentes:</h3>
+    <ul id="listaCategorias"></ul>
+  </div>
+</div>
+
+<!-- PANTALLA ROL -->
+<div id="pantallaRol" class="pantalla">
+  <div class="card">
+
+    <div class="carta">
+      <div class="cara frente">
+        <p>Tocá para revelar tu rol</p>
+      </div>
+      <div class="cara dorso" id="cartaDorso">
+        <p id="mensajeRol"></p>
+      </div>
+    </div>
+
+    <button onclick="siguienteJugador()">Listo</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
