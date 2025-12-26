@@ -11,17 +11,22 @@
 
 <!-- INICIO -->
 <div id="pantallaInicio" class="pantalla activa">
-  <div class="card">
+  <div class="card scroll">
 
     <h1>Juego del Impostor</h1>
 
     <input id="nombreJugador" placeholder="Nombre del jugador">
     <button onclick="agregarJugador()">Agregar jugador</button>
 
-    <div class="bloque">
-      <h3>Categoría</h3>
-      <div id="listaCategoriasInicio" class="categorias"></div>
-    </div>
+    <h3>Impostores</h3>
+    <select id="cantidadImpostores">
+      <option value="1">1 impostor</option>
+      <option value="2">2 impostores</option>
+      <option value="3">3 impostores</option>
+    </select>
+
+    <h3>Categoría</h3>
+    <div id="listaCategoriasInicio" class="categorias"></div>
 
     <button onclick="iniciarJuego()">Iniciar juego</button>
     <button onclick="abrirCategorias()">Editar categorías</button>
@@ -34,8 +39,7 @@
 
 <!-- CATEGORÍAS -->
 <div id="pantallaCategorias" class="pantalla">
-  <div class="card">
-
+  <div class="card scroll">
     <h2>Categorías</h2>
 
     <input id="nombreCategoria" placeholder="Nombre">
@@ -43,30 +47,24 @@
 
     <button onclick="agregarCategoria()">Agregar</button>
     <button onclick="volverInicio()">Volver</button>
-
-    <ul id="listaCategorias"></ul>
-
   </div>
 </div>
 
 <!-- ROLES -->
 <div id="pantallaRol" class="pantalla">
   <div class="card">
-
     <div class="carta" id="carta">
       <div class="cara frente">Tocá para ver tu rol</div>
       <div class="cara dorso" id="cartaDorso">
         <p id="mensajeRol"></p>
       </div>
     </div>
-
     <button onclick="siguienteJugador()">Listo</button>
-
   </div>
 </div>
 
 <!-- DISCUSIÓN -->
-<div id="pantallaDiscusion" class="pantalla">
+<div id="pantallaDiscusion" class="pantalla zoom">
   <div class="card">
     <h2>Discusión</h2>
     <h1 id="timer">03:00</h1>
@@ -75,7 +73,7 @@
 </div>
 
 <!-- VOTACIÓN -->
-<div id="pantallaVotacion" class="pantalla">
+<div id="pantallaVotacion" class="pantalla zoom">
   <div class="card">
     <h2>Votá al impostor</h2>
     <div id="listaVotos"></div>
@@ -83,7 +81,7 @@
 </div>
 
 <!-- FINAL -->
-<div id="pantallaFinal" class="pantalla">
+<div id="pantallaFinal" class="pantalla zoom">
   <div class="card">
     <h2 id="resultadoTexto"></h2>
     <p id="detalleFinal"></p>
@@ -98,12 +96,11 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-  const firebaseConfig = {
+  firebase.initializeApp({
     apiKey: "AIzaSyCtxf885htfeIABvT8BOwSuIp3EEf5tVbY",
     authDomain: "juego-impostor-b58d9.firebaseapp.com",
     projectId: "juego-impostor-b58d9"
-  };
-  firebase.initializeApp(firebaseConfig);
+  });
   const db = firebase.firestore();
 </script>
 
