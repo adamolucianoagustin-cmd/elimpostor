@@ -1,5 +1,6 @@
 let salaId = null;
 let esHost = false;
+
 let jugadores = [];
 let turnoActual = 0;
 let palabraSecreta = "";
@@ -17,11 +18,56 @@ function mostrarPantalla(id) {
   document.getElementById(id).classList.add("activa");
 }
 
+// ---------------- ONLINE ----------------
+function generarCodigoSala() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let codigo = "";
+  for (let i = 0; i < 5; i++) codigo += chars[Math.floor(Math.random() * chars.length)];
+  return codigo;
+}
+
+function crearSala() {
+  salaId = generarCodigoSala();
+  esHost = true;
+
+  db.collection("salas").doc(salaId).set({
+    jugadores: [],
+    creada: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  document.getElementById("codigoActual").textContent = "Código de sala: " + salaId;
+  escucharSala();
+}
+
+function unirseSala() {
+  const codigo = document.getElementById("codigoSala").value.trim().toUpperCase();
+  if (!codigo) return alert("Ingresá un código");
+
+  db.collection("salas").doc(codigo).get().then(doc => {
+    if (!doc.exists) return alert("Sala no encontrada");
+
+    salaId = codigo;
+    esHost = false;
+
+    document.getElementById("codigoActual").textContent = "Conectado a sala: " + salaId;
+    escucharSala();
+  });
+}
+
+function escucharSala() {
+  db.collection("salas").doc(salaId).onSnapshot(doc => {
+    if (!doc.exists) return;
+    jugadores = doc.data().jugadores || [];
+    mostrarJugadores();
+  });
+}
+
 // ---------------- JUGADORES ----------------
 function agregarJugador() {
   const input = document.getElementById("nombreJugador");
   const nombre = input.value.trim();
-  if (!nombre || !salaId) return;
+  if (!nombre) return alert("Escribí un nombre");
+  if (!salaId) return alert("Primero creá o uníte a una sala");
 
   db.collection("salas").doc(salaId).update({
     jugadores: firebase.firestore.FieldValue.arrayUnion(nombre)
@@ -43,7 +89,7 @@ function iniciarJuego() {
     return;
   }
 
-  const cant = parseInt(document.getElementById("cantidadImpostores").value);
+  const cant = parseInt(document.getElementById("cantidadImpostores").value, 10);
   impostores = [...jugadores].sort(() => Math.random() - 0.5).slice(0, cant);
 
   const palabras = categorias[categoriaSeleccionada];
@@ -66,8 +112,8 @@ function mostrarRol() {
   carta.onclick = () => {
     carta.classList.add("volteada");
     mensaje.textContent = impostores.includes(jugadores[turnoActual])
-  ? "SOS EL IMPOSTOR 😈"
-  : `PALABRA: ${palabraSecreta}`;
+      ? "SOS EL IMPOSTOR 😈"
+      : `PALABRA: ${palabraSecreta}`;
   };
 }
 
@@ -81,9 +127,11 @@ function iniciarDiscusion() {
   mostrarPantalla("pantallaDiscusion");
   tiempo = 180;
 
+  clearInterval(intervalo);
   intervalo = setInterval(() => {
     document.getElementById("timer").textContent =
-      `${String(Math.floor(tiempo / 60)).padStart(2, "0")}:${String(tiempo-- % 60).padStart(2, "0")}`;
+      `${String(Math.floor(tiempo / 60)).padStart(2, "0")}:${String(tiempo % 60).padStart(2, "0")}`;
+    tiempo--;
     if (tiempo < 0) irAVotacion();
   }, 1000);
 }
@@ -129,7 +177,7 @@ function nuevaRonda() {
   iniciarJuego();
 }
 
-// ---------------- CATEGORÍAS ----------------
+// ---------------- CATEGORÍAS (FIREBASE) ----------------
 function cargarCategorias() {
   db.collection("categorias").onSnapshot(snap => {
     categorias = {};
@@ -153,68 +201,21 @@ function cargarCategorias() {
 }
 
 function agregarCategoria() {
-  db.collection("categorias").doc(nombreCategoria.value).set({
-    palabras: palabrasCategoria.value.split(",").map(p => p.trim())
+  const n = nombreCategoria.value.trim();
+  const p = palabrasCategoria.value.trim();
+  if (!n || !p) return;
+
+  db.collection("categorias").doc(n).set({
+    palabras: p.split(",").map(x => x.trim()).filter(x => x)
   });
-  nombreCategoria.value = palabrasCategoria.value = "";
+
+  nombreCategoria.value = "";
+  palabrasCategoria.value = "";
 }
 
 function abrirCategorias() { mostrarPantalla("pantallaCategorias"); }
 function volverInicio() { mostrarPantalla("pantallaInicio"); }
 
-window.onload = cargarCategorias;
-
-function generarCodigoSala() {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let codigo = "";
-  for (let i = 0; i < 5; i++) {
-    codigo += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return codigo;
-}
-
-function crearSala() {
-  salaId = generarCodigoSala();
-  esHost = true;
-
-  db.collection("salas").doc(salaId).set({
-    jugadores: [],
-    creada: firebase.firestore.FieldValue.serverTimestamp()
-  });
-
-  document.getElementById("codigoActual").textContent =
-    "Código de sala: " + salaId;
-
-  escucharSala();
-}
-function unirseSala() {
-  const codigo = document.getElementById("codigoSala").value.trim().toUpperCase();
-  if (!codigo) return alert("Ingresá un código");
-
-  db.collection("salas").doc(codigo).get().then(doc => {
-    if (!doc.exists) {
-      alert("Sala no encontrada");
-      return;
-    }
-
-    salaId = codigo;
-    esHost = false;
-
-    document.getElementById("codigoActual").textContent =
-      "Conectado a sala: " + salaId;
-
-    escucharSala();
-  });
-}
-function escucharSala() {
-  db.collection("salas").doc(salaId).onSnapshot(doc => {
-    if (!doc.exists) return;
-
-    jugadores = doc.data().jugadores || [];
-    mostrarJugadores();
-  });
-}
-
-
-
-
+window.onload = () => {
+  cargarCategorias();
+};
