@@ -27,6 +27,7 @@ function generarCodigoSala() {
 }
 
 function crearSala() {
+  if (salaId) return;
   salaId = generarCodigoSala();
   esHost = true;
 
@@ -50,6 +51,7 @@ function unirseSala() {
     esHost = false;
 
     document.getElementById("codigoActual").textContent = "Conectado a sala: " + salaId;
+    mostrarPantalla("pantallaInicio");
     escucharSala();
   });
 }
@@ -231,4 +233,5 @@ function volverInicio() { mostrarPantalla("pantallaInicio"); }
 window.onload = () => {
   cargarCategorias();
 };
+
 
