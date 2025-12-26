@@ -1,157 +1,103 @@
-html, body {
-  height: 100%;
-  margin: 0;
-  background: radial-gradient(circle at top, #3b2d6f, #0e0b1f);
-  font-family: 'Cinzel', serif;
-  color: white;
-}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juego del Impostor</title>
 
-* { box-sizing: border-box; }
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-/* PANTALLAS */
-.pantalla {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding-top: 30px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .5s;
-}
+<!-- INICIO -->
+<div id="pantallaInicio" class="pantalla activa">
+  <div class="card scroll">
 
-.pantalla.activa {
-  opacity: 1;
-  pointer-events: all;
-}
+    <h1>Juego del Impostor</h1>
 
-/* CARD */
-.card {
-  width: 90%;
-  max-width: 420px;
-  background: rgba(20,18,40,.9);
-  border-radius: 18px;
-  padding: 25px;
-}
+    <h3>Modo online</h3>
+    <button onclick="crearSala()">Crear sala</button>
 
-.scroll {
-  max-height: calc(100vh - 60px);
-  overflow-y: auto;
-}
+    <input id="codigoSala" placeholder="Código de sala">
+    <button onclick="unirseSala()">Unirse a sala</button>
 
-/* INPUTS */
-input, textarea, button, select {
-  width: 100%;
-  margin-top: 12px;
-  padding: 14px;
-  border-radius: 12px;
-  border: none;
-}
+    <p id="codigoActual"></p>
 
-button {
-  background: linear-gradient(135deg,#7f5af0,#5ddcff);
-  font-weight: bold;
-  cursor: pointer;
-}
+    <input id="nombreJugador" placeholder="Tu nombre">
+    <button onclick="agregarJugador()">Agregarme a la sala</button>
 
-/* CATEGORÍAS */
-.categorias {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+    <h3>Impostores</h3>
+    <select id="cantidadImpostores">
+      <option value="1">1 impostor</option>
+      <option value="2">2 impostores</option>
+      <option value="3">3 impostores</option>
+    </select>
 
-.categoria-btn {
-  background: rgba(255,255,255,.15);
-  color: white;
-}
+    <h3>Categoría</h3>
+    <div id="listaCategoriasInicio" class="categorias"></div>
 
-.categoria-btn.activa {
-  background: linear-gradient(135deg,#00ffcc,#00b894);
-  color: #0e0b1f;
-}
+    <button onclick="iniciarJuego()">Iniciar juego (solo host)</button>
 
-/* CARTA */
-.carta {
-  height: 220px;
-  perspective: 1000px;
-}
+    <h3>Jugadores en sala</h3>
+    <ul id="listaJugadores"></ul>
 
-.cara {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 18px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  backface-visibility: hidden;
-  transition: transform .8s;
-}
+  </div>
+</div>
 
-.frente { background:#2d2a55; }
-.dorso { transform: rotateY(180deg); background: linear-gradient(135deg,#7f5af0,#5ddcff); }
+<!-- ROLES -->
+<div id="pantallaRol" class="pantalla">
+  <div class="card">
+    <div class="carta" id="carta">
+      <div class="cara frente">Tocá para ver tu rol</div>
+      <div class="cara dorso" id="cartaDorso">
+        <p id="mensajeRol"></p>
+      </div>
+    </div>
+    <button onclick="siguienteJugador()">Listo (solo host)</button>
+  </div>
+</div>
 
-.carta.volteada .frente { transform: rotateY(180deg); }
-.carta.volteada .dorso { transform: rotateY(360deg); }
+<!-- DISCUSIÓN -->
+<div id="pantallaDiscusion" class="pantalla">
+  <div class="card">
+    <h2>Discusión</h2>
+    <h1 id="timer">03:00</h1>
+    <button onclick="irAVotacion()">Ir a votación (solo host)</button>
+  </div>
+</div>
 
-.dorso.impostor {
-  background: linear-gradient(135deg,#ff4d4d,#7a0000);
-}
+<!-- VOTACIÓN -->
+<div id="pantallaVotacion" class="pantalla">
+  <div class="card">
+    <h2>Votá al impostor</h2>
+    <p id="textoVotoInfo" style="opacity:.9;margin-top:8px;"></p>
+    <div id="listaVotos"></div>
+  </div>
+</div>
 
-/* VOTACIÓN */
-#listaVotos {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-top: 20px;
-}
+<!-- FINAL -->
+<div id="pantallaFinal" class="pantalla">
+  <div class="card">
+    <h2 id="resultadoTexto"></h2>
+    <p id="detalleFinal"></p>
+    <button onclick="volverInicio()">Volver al inicio</button>
+  </div>
+</div>
 
-.voto-card {
-  padding: 18px;
-  border-radius: 16px;
-  text-align: center;
-  cursor: pointer;
-  background: rgba(255,255,255,.15);
-  transition: all .25s;
-}
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-.voto-card:hover {
-  transform: scale(1.03);
-}
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyCtxf885htfeIABvT8BOwSuIp3EEf5tVbY",
+  authDomain: "juego-impostor-b58d9.firebaseapp.com",
+  projectId: "juego-impostor-b58d9"
+});
+const db = firebase.firestore();
+</script>
 
-.voto-card.activo {
-  background: linear-gradient(135deg,#7f5af0,#00ffcc);
-  color: #0e0b1f;
-  transform: scale(1.05);
-}
-/* Scroll custom */
-.scroll::-webkit-scrollbar {
-  width: 6px;
-}
-
-.scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.scroll::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #7f5af0, #00ffcc);
-  border-radius: 10px;
-}
-
-.scroll::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #00ffcc, #7f5af0);
-}
-
-/* Firefox */
-.scroll {
-  scrollbar-width: thin;
-  scrollbar-color: #7f5af0 transparent;
-}
-.scroll {
-  scroll-behavior: smooth;
-  overscroll-behavior: contain;
-}
-
-
+<script src="script.js"></script>
+</body>
+</html>
