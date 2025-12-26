@@ -14,15 +14,17 @@
   <div class="card scroll">
 
     <h1>Juego del Impostor</h1>
+
+    <!-- MODO ONLINE (VA EN EL BODY, NO EN HEAD) -->
     <h3>Modo online</h3>
+    <button onclick="crearSala()">Crear sala online</button>
 
-<button onclick="crearSala()">Crear sala online</button>
+    <input id="codigoSala" placeholder="Código de sala">
+    <button onclick="unirseSala()">Unirse a sala</button>
 
-<input id="codigoSala" placeholder="Código de sala">
-<button onclick="unirseSala()">Unirse a sala</button>
+    <p id="codigoActual" style="margin-top:10px;font-weight:bold;"></p>
 
-<p id="codigoActual" style="margin-top:10px;font-weight:bold;"></p>
-
+    <!-- JUGADORES -->
     <input id="nombreJugador" placeholder="Nombre del jugador">
     <button onclick="agregarJugador()">Agregar jugador</button>
 
@@ -115,5 +117,3 @@ const db = firebase.firestore();
 <script src="script.js"></script>
 </body>
 </html>
-
-
