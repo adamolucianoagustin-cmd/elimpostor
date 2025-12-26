@@ -1,3 +1,5 @@
+let salaId = null;
+let esHost = false;
 let jugadores = [];
 let turnoActual = 0;
 let palabraSecreta = "";
@@ -157,4 +159,5 @@ function abrirCategorias() { mostrarPantalla("pantallaCategorias"); }
 function volverInicio() { mostrarPantalla("pantallaInicio"); }
 
 window.onload = cargarCategorias;
+
 
