@@ -57,10 +57,17 @@ function unirseSala() {
 function escucharSala() {
   db.collection("salas").doc(salaId).onSnapshot(doc => {
     if (!doc.exists) return;
-    jugadores = doc.data().jugadores || [];
+
+    const data = doc.data();
+    jugadores = data.jugadores || [];
     mostrarJugadores();
+
+    // Mostrar aviso de sala activa
+    document.getElementById("codigoActual").textContent =
+      "Sala activa: " + salaId + (esHost ? " (Host)" : "");
   });
 }
+
 
 // ---------------- JUGADORES ----------------
 function agregarJugador() {
@@ -84,6 +91,11 @@ function mostrarJugadores() {
 
 // ---------------- JUEGO ----------------
 function iniciarJuego() {
+  if (!esHost) {
+  alert("Solo el host puede iniciar la partida");
+  return;
+}
+
   if (jugadores.length < 3 || !categoriaSeleccionada) {
     alert("Faltan jugadores o categoría");
     return;
@@ -219,3 +231,4 @@ function volverInicio() { mostrarPantalla("pantallaInicio"); }
 window.onload = () => {
   cargarCategorias();
 };
+
