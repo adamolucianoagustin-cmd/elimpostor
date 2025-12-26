@@ -60,8 +60,8 @@ function mostrarRol() {
   carta.onclick = () => {
     carta.classList.add("volteada");
     mensaje.textContent = impostores.includes(jugadores[turnoActual])
-      ? `${jugadores[turnoActual]}: SOS IMPOSTOR 😈`
-      : `${jugadores[turnoActual]}: ${palabraSecreta}`;
+  ? "SOS EL IMPOSTOR 😈"
+  : `PALABRA: ${palabraSecreta}`;
   };
 }
 
@@ -157,3 +157,4 @@ function abrirCategorias() { mostrarPantalla("pantallaCategorias"); }
 function volverInicio() { mostrarPantalla("pantallaInicio"); }
 
 window.onload = cargarCategorias;
+
