@@ -164,7 +164,6 @@ function volverInicio() { mostrarPantalla("pantallaInicio"); }
 
 window.onload = cargarCategorias;
 
-  }
 function generarCodigoSala() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let codigo = "";
@@ -215,6 +214,7 @@ function escucharSala() {
     mostrarJugadores();
   });
 }
+
 
 
 
