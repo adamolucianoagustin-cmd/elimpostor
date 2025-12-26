@@ -8,15 +8,17 @@ html, body {
 
 * { box-sizing: border-box; }
 
+/* PANTALLAS */
 .pantalla {
   position: fixed;
   inset: 0;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 30px;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.5s, transform 0.5s;
+  transition: opacity .5s;
 }
 
 .pantalla.activa {
@@ -24,10 +26,7 @@ html, body {
   pointer-events: all;
 }
 
-.zoom.activa {
-  transform: scale(1);
-}
-
+/* CARD */
 .card {
   width: 90%;
   max-width: 420px;
@@ -37,10 +36,11 @@ html, body {
 }
 
 .scroll {
-  max-height: 90vh;
+  max-height: calc(100vh - 60px);
   overflow-y: auto;
 }
 
+/* INPUTS */
 input, textarea, button, select {
   width: 100%;
   margin-top: 12px;
@@ -55,15 +55,24 @@ button {
   cursor: pointer;
 }
 
-.categorias button {
+/* CATEGORÍAS */
+.categorias {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.categoria-btn {
   background: rgba(255,255,255,.15);
+  color: white;
 }
 
 .categoria-btn.activa {
   background: linear-gradient(135deg,#00ffcc,#00b894);
-  color: black;
+  color: #0e0b1f;
 }
 
+/* CARTA */
 .carta {
   height: 220px;
   perspective: 1000px;
@@ -89,4 +98,31 @@ button {
 
 .dorso.impostor {
   background: linear-gradient(135deg,#ff4d4d,#7a0000);
+}
+
+/* VOTACIÓN */
+#listaVotos {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.voto-card {
+  padding: 18px;
+  border-radius: 16px;
+  text-align: center;
+  cursor: pointer;
+  background: rgba(255,255,255,.15);
+  transition: all .25s;
+}
+
+.voto-card:hover {
+  transform: scale(1.03);
+}
+
+.voto-card.activo {
+  background: linear-gradient(135deg,#7f5af0,#00ffcc);
+  color: #0e0b1f;
+  transform: scale(1.05);
 }
