@@ -233,4 +233,133 @@ function renderVotacionUI() {
 
     card.onclick = () => {
       if (!miNombre) return alert("Primero escribí tu nombre y tocá 'Agregarme a la sala'");
-      if (yaVote)
+      if (yaVote) return;
+
+      yaVote = true;
+      document.querySelectorAll(".voto-card").forEach(x => x.classList.remove("activo"));
+      card.classList.add("activo");
+
+      db.collection("salas").doc(salaId).update({
+        [`votos.${miNombre}`]: j
+      }).catch(err => {
+        yaVote = false;
+        alert("Error votando: " + err.message);
+      });
+    };
+
+    div.appendChild(card);
+  });
+}
+
+// host calcula resultado 1 sola vez
+function calcularYPublicarResultadoSiCorresponde(data) {
+  if (!esHost) return;
+  if (data.fase !== "votacion") return;
+  if (!data.votos) return;
+
+  const votosObj = data.votos;
+  const cantVotos = Object.keys(votosObj).length;
+
+  // solo cuando todos votaron (todos los jugadores en sala)
+  if (cantVotos !== (data.jugadores || []).length) return;
+
+  // ya hay resultado
+  if (data.resultado) return;
+
+  const conteo = {};
+  Object.values(votosObj).forEach(v => conteo[v] = (conteo[v] || 0) + 1);
+  const votado = Object.keys(conteo).sort((a,b)=>conteo[b]-conteo[a])[0];
+
+  const civilesGanan = (data.impostores || []).includes(votado);
+
+  db.collection("salas").doc(salaId).update({
+    fase: "final",
+    resultado: {
+      votado,
+      civilesGanan,
+      conteo
+    }
+  }).catch(()=>{});
+}
+
+// ====== FINAL ======
+function mostrarFinalUI(data) {
+  mostrarPantalla("pantallaFinal");
+
+  const res = data.resultado;
+  const civilesGanan = !!res?.civilesGanan;
+
+  el("resultadoTexto").textContent = civilesGanan
+    ? "¡Civiles ganaron! 🎉"
+    : "¡Impostores ganaron! 😈";
+
+  const impostoresTxt = (data.impostores || []).join(", ") || "-";
+  const palabraTxt = data.palabra || "-";
+  const votadoTxt = res?.votado || "-";
+
+  el("detalleFinal").textContent =
+    `Votado: ${votadoTxt} | Impostores: ${impostoresTxt} | Palabra: "${palabraTxt}"`;
+}
+
+function volverInicio() {
+  mostrarPantalla("pantallaInicio");
+}
+
+// ====== LISTENER PRINCIPAL DE SALA ======
+function escucharSala() {
+  db.collection("salas").doc(salaId).onSnapshot(doc => {
+    if (!doc.exists) return;
+
+    const d = doc.data();
+
+    jugadores = d.jugadores || [];
+    actualizarListaJugadores();
+
+    // feedback visual fuerte
+    setEstadoSala(`Sala activa: ${salaId}${esHost ? " (Host)" : ""} | Jugadores: ${jugadores.length}`);
+
+    // sincronizar categoría elegida por host (opcional)
+    if (d.categoria && d.categoria !== categoriaSeleccionada) {
+      categoriaSeleccionada = d.categoria;
+      // marcar botón activo si existe
+      document.querySelectorAll(".categoria-btn").forEach(btn => {
+        btn.classList.toggle("activa", btn.textContent === categoriaSeleccionada);
+      });
+    }
+
+    if (d.fase === "roles") {
+      impostores = d.impostores || [];
+      palabraSecreta = d.palabra || "";
+      turnoActual = d.turno || 0;
+      mostrarPantalla("pantallaRol");
+      mostrarRol();
+      return;
+    }
+
+    if (d.fase === "discusion") {
+      iniciarDiscusionUI();
+      return;
+    }
+
+    if (d.fase === "votacion") {
+      renderVotacionUI();
+      calcularYPublicarResultadoSiCorresponde(d);
+      return;
+    }
+
+    if (d.fase === "final") {
+      mostrarFinalUI(d);
+      return;
+    }
+
+    // inicio
+    mostrarPantalla("pantallaInicio");
+  }, err => {
+    alert("Error escuchando sala: " + err.message);
+  });
+}
+
+// ====== INIT ======
+window.onload = () => {
+  escucharCategorias();
+};
