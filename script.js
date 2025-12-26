@@ -37,14 +37,13 @@ function iniciarJuego() {
     return;
   }
 
-  const cantImpostores = parseInt(document.getElementById("cantidadImpostores").value);
-  impostores = [...jugadores]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, cantImpostores);
+  const cant = parseInt(document.getElementById("cantidadImpostores").value);
+  impostores = [...jugadores].sort(() => Math.random() - 0.5).slice(0, cant);
 
-  palabraSecreta = categorias[categoriaSeleccionada][Math.floor(Math.random() * categorias[categoriaSeleccionada].length)];
+  const palabras = categorias[categoriaSeleccionada];
+  palabraSecreta = palabras[Math.floor(Math.random() * palabras.length)];
+
   turnoActual = 0;
-
   mostrarRol();
   mostrarPantalla("pantallaRol");
 }
@@ -75,6 +74,7 @@ function siguienteJugador() {
 function iniciarDiscusion() {
   mostrarPantalla("pantallaDiscusion");
   tiempo = 180;
+
   intervalo = setInterval(() => {
     document.getElementById("timer").textContent =
       `${String(Math.floor(tiempo / 60)).padStart(2, "0")}:${String(tiempo-- % 60).padStart(2, "0")}`;
@@ -90,27 +90,30 @@ function irAVotacion() {
 
   const div = document.getElementById("listaVotos");
   div.innerHTML = "";
-  jugadores.forEach(j => {
-    const btn = document.createElement("button");
-    btn.textContent = j;
-    btn.onclick = () => votar(j);
-    div.appendChild(btn);
-  });
-}
 
-function votar(jugador) {
-  if (!votacionActiva) return;
-  votacionActiva = false;
-  mostrarResultado(jugador);
+  jugadores.forEach(j => {
+    const card = document.createElement("div");
+    card.className = "voto-card";
+    card.textContent = j;
+
+    card.onclick = () => {
+      if (!votacionActiva) return;
+      votacionActiva = false;
+      card.classList.add("activo");
+      setTimeout(() => mostrarResultado(j), 600);
+    };
+
+    div.appendChild(card);
+  });
 }
 
 // ---------------- FINAL ----------------
 function mostrarResultado(votado) {
   mostrarPantalla("pantallaFinal");
 
-  const ganoCiviles = impostores.includes(votado);
+  const gananCiviles = impostores.includes(votado);
   document.getElementById("resultadoTexto").textContent =
-    ganoCiviles ? "¡Civiles ganaron! 🎉" : "¡Los impostores ganaron! 😈";
+    gananCiviles ? "¡Civiles ganaron! 🎉" : "¡Los impostores ganaron! 😈";
 
   document.getElementById("detalleFinal").textContent =
     `Impostores: ${impostores.join(", ")} | Palabra: "${palabraSecreta}"`;
@@ -125,17 +128,19 @@ function cargarCategorias() {
   db.collection("categorias").onSnapshot(snap => {
     categorias = {};
     snap.forEach(doc => categorias[doc.id] = doc.data().palabras);
+
     const div = document.getElementById("listaCategoriasInicio");
     div.innerHTML = "";
+
     Object.keys(categorias).forEach(c => {
       const b = document.createElement("button");
       b.textContent = c;
+      b.className = "categoria-btn";
       b.onclick = () => {
         categoriaSeleccionada = c;
         document.querySelectorAll(".categoria-btn").forEach(x => x.classList.remove("activa"));
         b.classList.add("activa");
       };
-      b.className = "categoria-btn";
       div.appendChild(b);
     });
   });
