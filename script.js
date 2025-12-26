@@ -71,10 +71,14 @@ function mostrarRol() {
 }
 
 function siguienteJugador() {
-  turnoActual++;
-  if (turnoActual >= jugadores.length) iniciarDiscusion();
-  else mostrarRol();
+  if (turnoActual < jugadores.length - 1) {
+    turnoActual++;
+    mostrarRol();
+  } else {
+    iniciarDiscusion();
+  }
 }
+
 
 // ---------------- DISCUSIÓN ----------------
 function iniciarDiscusion() {
@@ -183,3 +187,4 @@ function volverInicio() {
 }
 
 window.onload = cargarCategorias;
+
