@@ -15,22 +15,20 @@
   <div class="card scroll">
     <h1>Juego del Impostor</h1>
 
-    <h3>Modo online</h3>
     <button onclick="crearSala()">Crear sala</button>
-
     <input id="codigoSala" placeholder="Código de sala">
-    <button onclick="unirseSala()">Unirse a sala</button>
+    <button onclick="unirseSala()">Unirse</button>
 
     <p id="codigoActual"></p>
 
     <input id="nombreJugador" placeholder="Tu nombre">
-    <button onclick="agregarJugador()">Agregar jugador</button>
+    <button onclick="agregarJugador()">Entrar</button>
 
     <h3>Impostores</h3>
     <select id="cantidadImpostores">
-      <option value="1">1 impostor</option>
-      <option value="2">2 impostores</option>
-      <option value="3">3 impostores</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
     </select>
 
     <h3>Categoría</h3>
@@ -38,29 +36,28 @@
 
     <button onclick="iniciarJuego()">Iniciar juego (HOST)</button>
 
-    <h3>Jugadores</h3>
     <ul id="listaJugadores"></ul>
   </div>
 </div>
 
-<!-- ROLES -->
+<!-- ROL -->
 <div id="pantallaRol" class="pantalla">
   <div class="card">
-    <div class="carta" id="carta">
-      <div class="cara frente">Tocá para ver tu rol</div>
-      <div class="cara dorso" id="cartaDorso">
-        <p id="mensajeRol"></p>
-      </div>
-    </div>
-    <button onclick="siguienteJugador()">Siguiente (HOST)</button>
+    <h2 id="textoRol"></h2>
+    <button onclick="confirmarRol()">Listo</button>
   </div>
 </div>
 
 <!-- DISCUSIÓN -->
 <div id="pantallaDiscusion" class="pantalla">
-  <div class="card">
+  <div class="card scroll">
     <h2>Discusión</h2>
     <h1 id="timer">03:00</h1>
+
+    <div id="chat"></div>
+    <input id="mensajeChat" placeholder="Escribí algo">
+    <button onclick="enviarMensaje()">Enviar</button>
+
     <button onclick="irAVotacion()">Ir a votación (HOST)</button>
   </div>
 </div>
@@ -68,7 +65,7 @@
 <!-- VOTACIÓN -->
 <div id="pantallaVotacion" class="pantalla">
   <div class="card">
-    <h2>Votá al impostor</h2>
+    <h2>Votar</h2>
     <div id="listaVotos"></div>
   </div>
 </div>
@@ -78,6 +75,8 @@
   <div class="card">
     <h2 id="resultadoTexto"></h2>
     <p id="detalleFinal"></p>
+    <button onclick="nuevaRonda()">Nueva ronda</button>
+    <button onclick="volverLobby()">Volver al lobby</button>
   </div>
 </div>
 
