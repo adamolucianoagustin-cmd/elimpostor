@@ -51,7 +51,7 @@ function iniciarJuego() {
 }
 
 function mostrarRol() {
-  const carta = document.querySelector(".carta");
+  const carta = document.getElementById("carta");
   const mensaje = document.getElementById("mensajeRol");
   const dorso = document.getElementById("cartaDorso");
 
@@ -78,7 +78,6 @@ function siguienteJugador() {
     iniciarDiscusion();
   }
 }
-
 
 // ---------------- DISCUSIÓN ----------------
 function iniciarDiscusion() {
@@ -135,6 +134,7 @@ function mostrarResultado() {
   );
 
   const impostor = jugadores[impostorIndex];
+
   document.getElementById("resultadoTexto").textContent =
     ganador === impostor ? "¡Civiles ganaron!" : "¡El impostor ganó!";
 
@@ -162,7 +162,11 @@ function renderizarCategorias() {
     const btn = document.createElement("button");
     btn.textContent = c;
     btn.className = "categoria-btn";
-    btn.onclick = () => categoriaSeleccionada = c;
+    btn.onclick = () => {
+      categoriaSeleccionada = c;
+      document.querySelectorAll(".categoria-btn").forEach(b => b.classList.remove("activa"));
+      btn.classList.add("activa");
+    };
     div.appendChild(btn);
   }
 }
@@ -171,9 +175,11 @@ function agregarCategoria() {
   const n = nombreCategoria.value.trim();
   const p = palabrasCategoria.value.trim();
   if (!n || !p) return;
+
   db.collection("categorias").doc(n).set({
     palabras: p.split(",").map(x => x.trim())
   });
+
   nombreCategoria.value = "";
   palabrasCategoria.value = "";
 }
@@ -187,4 +193,3 @@ function volverInicio() {
 }
 
 window.onload = cargarCategorias;
-
