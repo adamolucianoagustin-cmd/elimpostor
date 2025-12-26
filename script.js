@@ -20,10 +20,14 @@ function mostrarPantalla(id) {
 // ---------------- JUGADORES ----------------
 function agregarJugador() {
   const input = document.getElementById("nombreJugador");
-  if (!input.value.trim()) return;
-  jugadores.push(input.value.trim());
+  const nombre = input.value.trim();
+  if (!nombre || !salaId) return;
+
+  db.collection("salas").doc(salaId).update({
+    jugadores: firebase.firestore.FieldValue.arrayUnion(nombre)
+  });
+
   input.value = "";
-  mostrarJugadores();
 }
 
 function mostrarJugadores() {
@@ -159,5 +163,58 @@ function abrirCategorias() { mostrarPantalla("pantallaCategorias"); }
 function volverInicio() { mostrarPantalla("pantallaInicio"); }
 
 window.onload = cargarCategorias;
+
+  }
+function generarCodigoSala() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let codigo = "";
+  for (let i = 0; i < 5; i++) {
+    codigo += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return codigo;
+}
+
+function crearSala() {
+  salaId = generarCodigoSala();
+  esHost = true;
+
+  db.collection("salas").doc(salaId).set({
+    jugadores: [],
+    creada: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  document.getElementById("codigoActual").textContent =
+    "Código de sala: " + salaId;
+
+  escucharSala();
+}
+function unirseSala() {
+  const codigo = document.getElementById("codigoSala").value.trim().toUpperCase();
+  if (!codigo) return alert("Ingresá un código");
+
+  db.collection("salas").doc(codigo).get().then(doc => {
+    if (!doc.exists) {
+      alert("Sala no encontrada");
+      return;
+    }
+
+    salaId = codigo;
+    esHost = false;
+
+    document.getElementById("codigoActual").textContent =
+      "Conectado a sala: " + salaId;
+
+    escucharSala();
+  });
+}
+function escucharSala() {
+  db.collection("salas").doc(salaId).onSnapshot(doc => {
+    if (!doc.exists) return;
+
+    jugadores = doc.data().jugadores || [];
+    mostrarJugadores();
+  });
+}
+
 
 
