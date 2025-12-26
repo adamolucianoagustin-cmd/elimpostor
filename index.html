@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Juego del Impostor</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
@@ -15,15 +15,18 @@
   <div class="card scroll">
     <h1>Juego del Impostor</h1>
 
-    <button onclick="crearSala()">Crear sala</button>
+    <button onclick="seleccionarModo('local')">Modo local</button>
+    <button onclick="seleccionarModo('online')">Modo online</button>
 
-    <input id="codigoSala" placeholder="Código de sala">
-    <button onclick="unirseSala()">Unirse</button>
-
-    <p id="codigoActual"></p>
+    <div id="bloqueOnline" style="display:none">
+      <button onclick="crearSala()">Crear sala</button>
+      <input id="codigoSala" placeholder="Código de sala">
+      <button onclick="unirseSala()">Unirse</button>
+      <p id="codigoActual"></p>
+    </div>
 
     <input id="nombreJugador" placeholder="Tu nombre">
-    <button onclick="agregarJugador()">Entrar</button>
+    <button onclick="agregarJugador()">Agregar jugador</button>
 
     <h3>Impostores</h3>
     <select id="cantidadImpostores">
@@ -77,13 +80,12 @@
   <div class="card">
     <h2 id="resultadoTexto"></h2>
     <p id="detalleFinal"></p>
-
     <button onclick="nuevaRonda()">Nueva ronda</button>
-    <button onclick="salirInicio()">Salir al inicio</button>
+    <button onclick="volverInicio()">Volver al inicio</button>
   </div>
 </div>
 
-<!-- FIREBASE -->
+<!-- FIREBASE (solo online) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
