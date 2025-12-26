@@ -126,3 +126,33 @@ button {
   color: #0e0b1f;
   transform: scale(1.05);
 }
+/* Scroll custom */
+.scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #7f5af0, #00ffcc);
+  border-radius: 10px;
+}
+
+.scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #00ffcc, #7f5af0);
+}
+
+/* Firefox */
+.scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #7f5af0 transparent;
+}
+.scroll {
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+
+
