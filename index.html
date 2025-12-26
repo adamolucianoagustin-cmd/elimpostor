@@ -64,7 +64,7 @@
 </div>
 
 <!-- DISCUSIÓN -->
-<div id="pantallaDiscusion" class="pantalla zoom">
+<div id="pantallaDiscusion" class="pantalla">
   <div class="card">
     <h2>Discusión</h2>
     <h1 id="timer">03:00</h1>
@@ -73,7 +73,7 @@
 </div>
 
 <!-- VOTACIÓN -->
-<div id="pantallaVotacion" class="pantalla zoom">
+<div id="pantallaVotacion" class="pantalla">
   <div class="card">
     <h2>Votá al impostor</h2>
     <div id="listaVotos"></div>
@@ -81,7 +81,7 @@
 </div>
 
 <!-- FINAL -->
-<div id="pantallaFinal" class="pantalla zoom">
+<div id="pantallaFinal" class="pantalla">
   <div class="card">
     <h2 id="resultadoTexto"></h2>
     <p id="detalleFinal"></p>
@@ -96,12 +96,12 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-  firebase.initializeApp({
-    apiKey: "AIzaSyCtxf885htfeIABvT8BOwSuIp3EEf5tVbY",
-    authDomain: "juego-impostor-b58d9.firebaseapp.com",
-    projectId: "juego-impostor-b58d9"
-  });
-  const db = firebase.firestore();
+firebase.initializeApp({
+  apiKey: "AIzaSyCtxf885htfeIABvT8BOwSuIp3EEf5tVbY",
+  authDomain: "juego-impostor-b58d9.firebaseapp.com",
+  projectId: "juego-impostor-b58d9"
+});
+const db = firebase.firestore();
 </script>
 
 <script src="script.js"></script>
