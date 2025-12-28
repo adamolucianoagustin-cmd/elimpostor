@@ -1,6 +1,7 @@
 let modo = "local";
 
 let jugadores = [];
+let jugadoresVivos = [];
 let categorias = {};
 let categoriaSeleccionada = null;
 
@@ -26,7 +27,10 @@ function mostrarPantalla(id) {
 function seleccionarModo(m) {
   modo = m;
   jugadores = [];
+  jugadoresVivos = [];
   listaJugadores.innerHTML = "";
+  contadorJugadores.textContent = "Jugadores: 0";
+  validarInicio();
   bloqueOnline.style.display = m === "online" ? "block" : "none";
 }
 
@@ -45,18 +49,32 @@ db.collection("categorias").onSnapshot(snap => {
       categoriaSeleccionada = c;
       document.querySelectorAll(".categoria-btn").forEach(x => x.classList.remove("activa"));
       b.classList.add("activa");
+      validarInicio();
     };
     listaCategoriasInicio.appendChild(b);
   });
 });
 
+// ---------------- VALIDACIÓN ----------------
+function validarInicio() {
+  btnIniciar.disabled =
+    jugadores.length < 3 ||
+    !categoriaSeleccionada ||
+    parseInt(cantidadImpostores.value) >= jugadores.length;
+}
+
 // ---------------- JUGADORES ----------------
 function agregarJugador() {
   const nombre = nombreJugador.value.trim();
   if (!nombre) return;
+
   jugadores.push(nombre);
+  jugadoresVivos.push(nombre);
+
   nombreJugador.value = "";
   listaJugadores.innerHTML = jugadores.map(j => `<li>${j}</li>`).join("");
+  contadorJugadores.textContent = `Jugadores: ${jugadores.length}`;
+  validarInicio();
 }
 
 // ---------------- INICIAR JUEGO ----------------
@@ -85,7 +103,6 @@ function mostrarCartaJugador() {
   const jugador = ordenRolesLocal[indiceRolLocal];
   frenteCarta.textContent = `Le toca a:\n${jugador}`;
   dorsoCarta.textContent = "";
-
   cartaRol.classList.remove("volteada");
 
   cartaRol.onclick = () => {
@@ -102,11 +119,9 @@ function mostrarCartaJugador() {
 
 function confirmarRol() {
   indiceRolLocal++;
-  if (indiceRolLocal < ordenRolesLocal.length) {
-    mostrarCartaJugador();
-  } else {
-    iniciarDiscusion();
-  }
+  indiceRolLocal < ordenRolesLocal.length
+    ? mostrarCartaJugador()
+    : iniciarDiscusion();
 }
 
 // ---------------- DISCUSIÓN ----------------
@@ -127,29 +142,45 @@ function irAVotacion() {
   clearInterval(intervalo);
   mostrarPantalla("pantallaVotacion");
 
-  listaVotos.innerHTML = jugadores.map(j =>
-    `<div class="voto-card" onclick="mostrarResultado('${j}')">${j}</div>`
+  listaVotos.innerHTML = jugadoresVivos.map(j =>
+    `<div class="voto-card" onclick="procesarVoto('${j}')">${j}</div>`
   ).join("");
 }
 
-// ---------------- RESULTADO ----------------
-function mostrarResultado(votado) {
-  const impostores = Object.keys(roles).filter(j => roles[j] === "impostor");
+// ---------------- LÓGICA DE VOTO ----------------
+function procesarVoto(votado) {
+  const esImpostor = roles[votado] === "impostor";
+  jugadoresVivos = jugadoresVivos.filter(j => j !== votado);
 
-  resultadoTexto.textContent =
-    impostores.includes(votado)
-      ? "¡Civiles ganaron! 🎉"
-      : "¡Impostores ganaron! 😈";
+  const impostoresVivos = jugadoresVivos.filter(j => roles[j] === "impostor");
+  const civilesVivos = jugadoresVivos.filter(j => roles[j] === "civil");
 
-  detalleFinal.textContent =
-    `Impostores: ${impostores.join(", ")} | Palabra: "${palabra}"`;
+  if (impostoresVivos.length === 0) {
+    mostrarFinal("¡Civiles ganaron! 🎉");
+    return;
+  }
 
-  mostrarPantalla("pantallaFinal");
+  if (civilesVivos.length === 0) {
+    mostrarFinal("¡Impostores ganaron! 😈");
+    return;
+  }
+
+  iniciarDiscusion();
 }
 
 // ---------------- FINAL ----------------
-function nuevaRonda() {
-  mostrarPantalla("pantallaInicio");
+function mostrarFinal(texto) {
+  resultadoTexto.textContent = texto;
+
+  let detalle = "<strong>Roles finales:</strong><br><br>";
+  Object.entries(roles).forEach(([j,r]) => {
+    detalle += `${j} → ${r === "impostor" ? "Impostor 😈" : "Civil"}<br>`;
+  });
+
+  detalle += `<br><strong>Palabra:</strong> "${palabra}"`;
+  detalleFinal.innerHTML = detalle;
+
+  mostrarPantalla("pantallaFinal");
 }
 
 function salirInicio() {
