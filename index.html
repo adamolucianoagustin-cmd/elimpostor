@@ -10,7 +10,6 @@
 </head>
 <body>
 
-<!-- INICIO -->
 <div id="pantallaInicio" class="pantalla activa">
   <div class="card scroll">
     <h1>Juego del Impostor</h1>
@@ -28,6 +27,8 @@
     <input id="nombreJugador" placeholder="Nombre del jugador">
     <button onclick="agregarJugador()">Agregar jugador</button>
 
+    <p id="contadorJugadores">Jugadores: 0</p>
+
     <h3>Impostores</h3>
     <select id="cantidadImpostores">
       <option value="1">1 impostor</option>
@@ -37,7 +38,7 @@
     <h3>Categoría</h3>
     <div id="listaCategoriasInicio" class="categorias"></div>
 
-    <button onclick="iniciarJuego()">Iniciar juego</button>
+    <button id="btnIniciar" onclick="iniciarJuego()" disabled>Iniciar juego</button>
 
     <h3>Jugadores</h3>
     <ul id="listaJugadores"></ul>
@@ -77,12 +78,10 @@
   <div class="card">
     <h2 id="resultadoTexto"></h2>
     <p id="detalleFinal"></p>
-    <button onclick="nuevaRonda()">Nueva ronda</button>
     <button onclick="salirInicio()">Volver al inicio</button>
   </div>
 </div>
 
-<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
