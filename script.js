@@ -97,16 +97,20 @@ function mostrarCarta() {
   carta.classList.remove("volteada");
   cartaMostrada = false;
 
-  carta.onclick = () => {
+  const tocarCarta = () => {
     if (!cartaMostrada) {
       carta.classList.add("volteada");
       cartaMostrada = true;
     } else {
       carta.classList.remove("volteada");
-      carta.onclick = null;
-      setTimeout(siguienteJugador, 400);
+      carta.removeEventListener("click", tocarCarta);
+      carta.removeEventListener("touchstart", tocarCarta);
+      setTimeout(siguienteJugador, 500);
     }
   };
+
+  carta.addEventListener("click", tocarCarta);
+  carta.addEventListener("touchstart", tocarCarta);
 
   mostrarPantalla("pantallaRol");
 }
@@ -153,3 +157,4 @@ function mostrarResultado() {
     ${Object.keys(roles).filter(j => roles[j] === "impostor").join(", ")}
   `;
 }
+
