@@ -52,9 +52,24 @@
 
 <!-- ================= ONLINE (placeholder) ================= -->
 <div id="pantallaOnline" class="pantalla">
-  <div class="card">
+  <div class="card scroll">
+
     <h2>Modo Online</h2>
-    <p>🚧 En construcción</p>
+
+    <input id="nombreOnline" placeholder="Tu nombre">
+
+    <button onclick="crearSala()">➕ Crear sala</button>
+
+    <hr>
+
+    <input id="codigoSala" placeholder="Código de sala">
+    <button onclick="unirseSala()">🔑 Unirse a sala</button>
+
+    <p id="codigoActual"></p>
+
+    <h3>Jugadores</h3>
+    <ul id="listaJugadoresOnline"></ul>
+
     <button onclick="volverSelector()">⬅ Volver</button>
   </div>
 </div>
@@ -112,3 +127,4 @@ const db = firebase.firestore();
 <script src="script.js"></script>
 </body>
 </html>
+
