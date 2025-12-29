@@ -8,6 +8,20 @@ function irModoLocal() { mostrarPantalla("pantallaLocal"); }
 function irModoOnline() { mostrarPantalla("pantallaOnline"); }
 function volverSelector() { mostrarPantalla("pantallaModo"); }
 
+// ================= DOM =================
+const nombreOnline = document.getElementById("nombreOnline");
+const codigoSala = document.getElementById("codigoSala");
+const codigoActual = document.getElementById("codigoActual");
+const listaJugadoresOnline = document.getElementById("listaJugadoresOnline");
+const btnIniciarOnline = document.getElementById("btnIniciarOnline");
+
+const nombreJugador = document.getElementById("nombreJugador");
+const listaJugadores = document.getElementById("listaJugadores");
+const contadorJugadores = document.getElementById("contadorJugadores");
+const btnIniciar = document.getElementById("btnIniciar");
+const cantidadImpostores = document.getElementById("cantidadImpostores");
+const listaCategoriasInicio = document.getElementById("listaCategoriasInicio");
+
 // ================= ONLINE =================
 let unsubscribeJugadores = null;
 
@@ -142,4 +156,5 @@ function agregarJugador() {
 function iniciarJuego() {
   alert("Modo local OK (ya funcionaba)");
 }
+
 
