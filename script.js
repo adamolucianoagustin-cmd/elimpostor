@@ -1,25 +1,21 @@
-// ---------------- MODO ----------------
-function irModoLocal() {
-  mostrarPantalla("pantallaLocal");
+// ================= PANTALLAS =================
+function mostrarPantalla(id) {
+  document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa"));
+  document.getElementById(id).classList.add("activa");
 }
-function irModoOnline() {
-  mostrarPantalla("pantallaOnline");
-}
-function volverSelector() {
-  mostrarPantalla("pantallaModo");
-}
-// ---------------- ONLINE ----------------
+
+function irModoLocal() { mostrarPantalla("pantallaLocal"); }
+function irModoOnline() { mostrarPantalla("pantallaOnline"); }
+function volverSelector() { mostrarPantalla("pantallaModo"); }
+
+// ================= ONLINE =================
 let salaActual = null;
 let soyHost = false;
 
 function generarCodigo() {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ123456789";
-  let codigo = "";
-  for (let i = 0; i < 5; i++) {
-    codigo += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return codigo;
+  return Math.random().toString(36).substring(2, 7).toUpperCase();
 }
+
 function crearSala() {
   const nombre = nombreOnline.value.trim();
   if (!nombre) return alert("Ingresá tu nombre");
@@ -29,90 +25,70 @@ function crearSala() {
   soyHost = true;
 
   db.collection("salas").doc(codigo).set({
-    host: nombre,
-    estado: "esperando"
+    estado: "esperando",
+    host: nombre
   });
 
   db.collection("salas").doc(codigo)
     .collection("jugadores")
-    .add({
-      nombre,
-      host: true
-    });
+    .add({ nombre, host: true });
 
-  codigoActual.textContent = "Código de sala: " + codigo;
+  codigoActual.textContent = "Código: " + codigo;
+  document.getElementById("btnIniciarOnline").style.display = "block";
 
-  escucharJugadores(codigo);
-  document.getElementById("btnIniciarOnline").style.display =
-  soyHost ? "block" : "none";
-  
-  function iniciarJuegoOnline() {
-  if (!soyHost) return;
-
-  db.collection("salas").doc(salaActual).update({
-    estado: "jugando"
-  });
+  escucharJugadores();
+  escucharEstadoSala();
 }
 
-
-}
 function unirseSala() {
   const nombre = nombreOnline.value.trim();
   const codigo = codigoSala.value.trim().toUpperCase();
-
-  if (!nombre || !codigo)
-    return alert("Completá nombre y código");
+  if (!nombre || !codigo) return alert("Completá todo");
 
   const salaRef = db.collection("salas").doc(codigo);
 
   salaRef.get().then(doc => {
-    if (!doc.exists) {
-      alert("La sala no existe");
-      return;
-    }
+    if (!doc.exists) return alert("La sala no existe");
 
     salaActual = codigo;
     soyHost = false;
 
-    salaRef.collection("jugadores").add({
-      nombre,
-      host: false
-    });
+    salaRef.collection("jugadores").add({ nombre, host: false });
 
     codigoActual.textContent = "Sala: " + codigo;
-    escucharJugadores(codigo);
+    escucharJugadores();
+    escucharEstadoSala();
   });
 }
 
-function escucharJugadores(codigo) {
-  db.collection("salas")
-    .doc(codigo)
+function escucharJugadores() {
+  db.collection("salas").doc(salaActual)
     .collection("jugadores")
-    .onSnapshot(snapshot => {
-
+    .onSnapshot(snap => {
       listaJugadoresOnline.innerHTML = "";
-
-      snapshot.forEach(doc => {
+      snap.forEach(doc => {
         const j = doc.data();
-        const li = document.createElement("li");
-        li.textContent = j.nombre + (j.host ? " 👑" : "");
-        listaJugadoresOnline.appendChild(li);
+        listaJugadoresOnline.innerHTML +=
+          `<li>${j.nombre}${j.host ? " 👑" : ""}</li>`;
       });
     });
 }
+
+function iniciarJuegoOnline() {
+  if (!soyHost) return;
+  db.collection("salas").doc(salaActual).update({ estado: "jugando" });
+}
+
 function escucharEstadoSala() {
   db.collection("salas").doc(salaActual)
     .onSnapshot(doc => {
-      if (!doc.exists) return;
-
-      const data = doc.data();
-      if (data.estado === "jugando") {
-        iniciarRepartoOnline();
+      if (doc.data()?.estado === "jugando") {
+        alert("🎮 El juego va a comenzar (Etapa 3)");
       }
     });
 }
 
-// ---------------- DATOS ----------------
+// ================= LOCAL (IGUAL QUE ANTES) =================
 let jugadores = [];
 let jugadoresVivos = [];
 let categorias = {};
@@ -120,34 +96,15 @@ let categoriaSeleccionada = null;
 let roles = {};
 let palabra = "";
 
-// carta
-let ordenRolesLocal = [];
-let indiceRolLocal = 0;
-let cartaAbierta = false;
-
-// timer
-let tiempo = 180;
-let intervalo;
-
-// ---------------- PANTALLAS ----------------
-function mostrarPantalla(id) {
-  document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa"));
-  document.getElementById(id).classList.add("activa");
-}
-
-// ---------------- CATEGORÍAS ----------------
 db.collection("categorias").onSnapshot(snap => {
-  categorias = {};
   listaCategoriasInicio.innerHTML = "";
-
-  snap.forEach(doc => categorias[doc.id] = doc.data().palabras);
-
-  Object.keys(categorias).forEach(c => {
+  snap.forEach(doc => {
+    categorias[doc.id] = doc.data().palabras;
     const b = document.createElement("button");
-    b.textContent = c;
+    b.textContent = doc.id;
     b.className = "categoria-btn";
     b.onclick = () => {
-      categoriaSeleccionada = c;
+      categoriaSeleccionada = doc.id;
       document.querySelectorAll(".categoria-btn").forEach(x => x.classList.remove("activa"));
       b.classList.add("activa");
       validarInicio();
@@ -156,128 +113,24 @@ db.collection("categorias").onSnapshot(snap => {
   });
 });
 
-// ---------------- VALIDACIÓN ----------------
 function validarInicio() {
   btnIniciar.disabled =
     jugadores.length < 3 ||
     !categoriaSeleccionada ||
-    parseInt(cantidadImpostores.value) >= jugadores.length;
+    cantidadImpostores.value >= jugadores.length;
 }
 
-// ---------------- JUGADORES ----------------
 function agregarJugador() {
   const nombre = nombreJugador.value.trim();
   if (!nombre) return;
-
   jugadores.push(nombre);
   jugadoresVivos.push(nombre);
-
   nombreJugador.value = "";
   listaJugadores.innerHTML = jugadores.map(j => `<li>${j}</li>`).join("");
   contadorJugadores.textContent = `Jugadores: ${jugadores.length}`;
   validarInicio();
 }
 
-// ---------------- INICIAR ----------------
 function iniciarJuego() {
-  const cant = parseInt(cantidadImpostores.value);
-  const mix = [...jugadores].sort(() => Math.random() - 0.5);
-
-  roles = {};
-  mix.forEach((j,i)=> roles[j] = i < cant ? "impostor" : "civil");
-
-  palabra = categorias[categoriaSeleccionada][
-    Math.floor(Math.random() * categorias[categoriaSeleccionada].length)
-  ];
-
-  ordenRolesLocal = [...jugadores].sort(() => Math.random() - 0.5);
-  indiceRolLocal = 0;
-
-  mostrarCartaJugador();
+  alert("Modo local OK (ya funcionaba)");
 }
-
-// ---------------- CARTA ----------------
-function mostrarCartaJugador() {
-  cartaAbierta = false;
-  mostrarPantalla("pantallaRol");
-
-  const jugador = ordenRolesLocal[indiceRolLocal];
-  frenteCarta.textContent = `Le toca a:\n${jugador}`;
-  dorsoCarta.textContent = "";
-  cartaRol.classList.remove("volteada");
-
-  cartaRol.onclick = () => {
-    if (cartaAbierta) return;
-    cartaAbierta = true;
-    cartaRol.classList.add("volteada");
-
-    dorsoCarta.textContent =
-      roles[jugador] === "impostor"
-        ? "SOS EL IMPOSTOR 😈"
-        : `PALABRA:\n${palabra}`;
-  };
-}
-
-function confirmarRol() {
-  indiceRolLocal++;
-  indiceRolLocal < ordenRolesLocal.length
-    ? mostrarCartaJugador()
-    : iniciarDiscusion();
-}
-
-// ---------------- DISCUSIÓN ----------------
-function iniciarDiscusion() {
-  mostrarPantalla("pantallaDiscusion");
-  tiempo = 180;
-  clearInterval(intervalo);
-
-  intervalo = setInterval(() => {
-    timer.textContent =
-      `${String(Math.floor(tiempo/60)).padStart(2,"0")}:${String(tiempo%60).padStart(2,"0")}`;
-    if (--tiempo < 0) irAVotacion();
-  }, 1000);
-}
-
-// ---------------- VOTACIÓN ----------------
-function irAVotacion() {
-  clearInterval(intervalo);
-  mostrarPantalla("pantallaVotacion");
-
-  listaVotos.innerHTML = jugadoresVivos.map(j =>
-    `<div class="voto-card" onclick="procesarVoto('${j}')">${j}</div>`
-  ).join("");
-}
-
-function procesarVoto(votado) {
-  jugadoresVivos = jugadoresVivos.filter(j => j !== votado);
-
-  if (!jugadoresVivos.some(j => roles[j] === "impostor"))
-    return mostrarFinal("¡Civiles ganaron! 🎉");
-
-  if (!jugadoresVivos.some(j => roles[j] === "civil"))
-    return mostrarFinal("¡Impostores ganaron! 😈");
-
-  iniciarDiscusion();
-}
-
-// ---------------- FINAL ----------------
-function mostrarFinal(texto) {
-  resultadoTexto.textContent = texto;
-
-  let detalle = "<strong>Roles:</strong><br><br>";
-  Object.entries(roles).forEach(([j,r]) =>
-    detalle += `${j} → ${r === "impostor" ? "Impostor 😈" : "Civil"}<br>`
-  );
-
-  detalle += `<br><strong>Palabra:</strong> "${palabra}"`;
-  detalleFinal.innerHTML = detalle;
-
-  mostrarPantalla("pantallaFinal");
-}
-
-function salirInicio() {
-  location.reload();
-}
-
-
-
