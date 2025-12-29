@@ -10,7 +10,7 @@
 </head>
 <body>
 
-<!-- SELECTOR DE MODO -->
+<!-- ================= MODO ================= -->
 <div id="pantallaModo" class="pantalla activa">
   <div class="card">
     <h1>Juego del Impostor</h1>
@@ -21,10 +21,11 @@
   </div>
 </div>
 
-<!-- MODO LOCAL (IGUAL AL ORIGINAL) -->
+<!-- ================= LOCAL ================= -->
 <div id="pantallaLocal" class="pantalla">
   <div class="card scroll">
-    <h1>Juego del Impostor</h1>
+
+    <h2>Modo Local</h2>
 
     <input id="nombreJugador" placeholder="Nombre del jugador">
     <button onclick="agregarJugador()">Agregar jugador</button>
@@ -49,39 +50,16 @@
   </div>
 </div>
 
-<!-- MODO ONLINE (LOBBY) -->
+<!-- ================= ONLINE (placeholder) ================= -->
 <div id="pantallaOnline" class="pantalla">
-  <div class="card scroll">
+  <div class="card">
     <h2>Modo Online</h2>
-
-    <input id="nombreOnline" placeholder="Tu nombre">
-
-    <button onclick="crearSala()">Crear sala</button>
-
-    <input id="codigoSala" placeholder="Código de sala">
-    <button onclick="unirseSala()">Unirse a sala</button>
-
-    <p id="codigoActual"></p>
-
-    <h3>Jugadores en sala</h3>
-    <ul id="listaJugadoresOnline"></ul>
-
-    <h3>Categoría</h3>
-    <div id="listaCategoriasOnline" class="categorias"></div>
-
-    <h3>Impostores</h3>
-    <select id="cantidadImpostoresOnline">
-      <option value="1">1 impostor</option>
-      <option value="2">2 impostores</option>
-    </select>
-
-    <button onclick="iniciarJuegoOnline()">Iniciar juego</button>
-
+    <p>🚧 En construcción</p>
     <button onclick="volverSelector()">⬅ Volver</button>
   </div>
 </div>
 
-<!-- ROL -->
+<!-- ================= ROL ================= -->
 <div id="pantallaRol" class="pantalla">
   <div class="card">
     <div class="carta" id="cartaRol">
@@ -92,7 +70,7 @@
   </div>
 </div>
 
-<!-- DISCUSIÓN -->
+<!-- ================= DISCUSIÓN ================= -->
 <div id="pantallaDiscusion" class="pantalla">
   <div class="card">
     <h2>Discusión</h2>
@@ -101,7 +79,7 @@
   </div>
 </div>
 
-<!-- VOTACIÓN -->
+<!-- ================= VOTACIÓN ================= -->
 <div id="pantallaVotacion" class="pantalla">
   <div class="card">
     <h2>Votá al impostor</h2>
@@ -109,7 +87,7 @@
   </div>
 </div>
 
-<!-- FINAL -->
+<!-- ================= FINAL ================= -->
 <div id="pantallaFinal" class="pantalla">
   <div class="card">
     <h2 id="resultadoTexto"></h2>
@@ -118,6 +96,7 @@
   </div>
 </div>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
