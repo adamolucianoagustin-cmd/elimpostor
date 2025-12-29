@@ -43,6 +43,18 @@ function crearSala() {
   codigoActual.textContent = "Código de sala: " + codigo;
 
   escucharJugadores(codigo);
+  document.getElementById("btnIniciarOnline").style.display =
+  soyHost ? "block" : "none";
+  
+  function iniciarJuegoOnline() {
+  if (!soyHost) return;
+
+  db.collection("salas").doc(salaActual).update({
+    estado: "jugando"
+  });
+}
+
+
 }
 function unirseSala() {
   const nombre = nombreOnline.value.trim();
@@ -86,6 +98,17 @@ function escucharJugadores(codigo) {
         li.textContent = j.nombre + (j.host ? " 👑" : "");
         listaJugadoresOnline.appendChild(li);
       });
+    });
+}
+function escucharEstadoSala() {
+  db.collection("salas").doc(salaActual)
+    .onSnapshot(doc => {
+      if (!doc.exists) return;
+
+      const data = doc.data();
+      if (data.estado === "jugando") {
+        iniciarRepartoOnline();
+      }
     });
 }
 
@@ -255,5 +278,6 @@ function mostrarFinal(texto) {
 function salirInicio() {
   location.reload();
 }
+
 
 
