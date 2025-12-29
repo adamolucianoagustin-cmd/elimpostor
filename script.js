@@ -1,13 +1,3 @@
-// ================= PANTALLAS =================
-function mostrarPantalla(id) {
-  document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa"));
-  document.getElementById(id).classList.add("activa");
-}
-
-function irModoLocal() { mostrarPantalla("pantallaLocal"); }
-function irModoOnline() { mostrarPantalla("pantallaOnline"); }
-function volverSelector() { mostrarPantalla("pantallaModo"); }
-
 // ================= DOM =================
 const nombreOnline = document.getElementById("nombreOnline");
 const codigoSala = document.getElementById("codigoSala");
@@ -22,11 +12,20 @@ const btnIniciar = document.getElementById("btnIniciar");
 const cantidadImpostores = document.getElementById("cantidadImpostores");
 const listaCategoriasInicio = document.getElementById("listaCategoriasInicio");
 
-// ================= ONLINE =================
-let unsubscribeJugadores = null;
+// ================= PANTALLAS =================
+function mostrarPantalla(id) {
+  document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa"));
+  document.getElementById(id).classList.add("activa");
+}
 
+function irModoLocal() { mostrarPantalla("pantallaLocal"); }
+function irModoOnline() { mostrarPantalla("pantallaOnline"); }
+function volverSelector() { mostrarPantalla("pantallaModo"); }
+
+// ================= ONLINE =================
 let salaActual = null;
 let soyHost = false;
+let unsubscribeJugadores = null;
 
 function generarCodigo() {
   return Math.random().toString(36).substring(2, 7).toUpperCase();
@@ -49,7 +48,7 @@ function crearSala() {
       .add({ nombre, host: true });
   }).then(() => {
     codigoActual.textContent = "Código: " + codigo;
-    document.getElementById("btnIniciarOnline").style.display = "block";
+    btnIniciarOnline.style.display = "block";
     escucharJugadores();
     escucharEstadoSala();
   });
@@ -63,30 +62,25 @@ function unirseSala() {
   const salaRef = db.collection("salas").doc(codigo);
 
   salaRef.get().then(doc => {
-    if (!doc.exists) return alert("La sala no existe");
-
+    if (!doc.exists) throw "La sala no existe";
     salaActual = codigo;
     soyHost = false;
-
-    return salaRef.collection("jugadores")
-      .add({ nombre, host: false });
+    return salaRef.collection("jugadores").add({ nombre, host: false });
   }).then(() => {
     codigoActual.textContent = "Sala: " + salaActual;
     escucharJugadores();
     escucharEstadoSala();
-  });
+  }).catch(e => alert(e));
 }
 
 function escucharJugadores() {
   if (unsubscribeJugadores) unsubscribeJugadores();
 
-  unsubscribeJugadores = db
-    .collection("salas")
+  unsubscribeJugadores = db.collection("salas")
     .doc(salaActual)
     .collection("jugadores")
     .onSnapshot(snapshot => {
       listaJugadoresOnline.innerHTML = "";
-
       snapshot.forEach(doc => {
         const j = doc.data();
         const li = document.createElement("li");
@@ -105,21 +99,20 @@ function escucharEstadoSala() {
   db.collection("salas").doc(salaActual)
     .onSnapshot(doc => {
       if (doc.data()?.estado === "jugando") {
-        alert("🎮 El juego va a comenzar (Etapa 3)");
+        alert("🎮 Juego online iniciado (Etapa 3)");
       }
     });
 }
 
-// ================= LOCAL (IGUAL QUE ANTES) =================
+// ================= LOCAL =================
 let jugadores = [];
-let jugadoresVivos = [];
 let categorias = {};
 let categoriaSeleccionada = null;
-let roles = {};
-let palabra = "";
 
 db.collection("categorias").onSnapshot(snap => {
   listaCategoriasInicio.innerHTML = "";
+  categorias = {};
+
   snap.forEach(doc => {
     categorias[doc.id] = doc.data().palabras;
     const b = document.createElement("button");
@@ -139,14 +132,14 @@ function validarInicio() {
   btnIniciar.disabled =
     jugadores.length < 3 ||
     !categoriaSeleccionada ||
-    cantidadImpostores.value >= jugadores.length;
+    parseInt(cantidadImpostores.value) >= jugadores.length;
 }
 
 function agregarJugador() {
   const nombre = nombreJugador.value.trim();
   if (!nombre) return;
+
   jugadores.push(nombre);
-  jugadoresVivos.push(nombre);
   nombreJugador.value = "";
   listaJugadores.innerHTML = jugadores.map(j => `<li>${j}</li>`).join("");
   contadorJugadores.textContent = `Jugadores: ${jugadores.length}`;
@@ -154,7 +147,6 @@ function agregarJugador() {
 }
 
 function iniciarJuego() {
-  alert("Modo local OK (ya funcionaba)");
+  // 👇 acá después conectamos con el reparto real
+  alert("🎴 Juego local iniciado correctamente");
 }
-
-
