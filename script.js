@@ -22,7 +22,6 @@ function irModoOnline() { mostrarPantalla("pantallaOnline"); }
 function volverSelector() { mostrarPantalla("pantallaModo"); }
 
 // ================= LOCAL =================
-// ================= LOCAL =================
 let jugadores = [];
 let categorias = {};
 let categoriaSeleccionada = null;
@@ -257,4 +256,5 @@ function iniciarJuegoOnline() {
   if (!soyHost) return;
   alert("🚀 Inicio online (etapa siguiente)");
 }
+
 
