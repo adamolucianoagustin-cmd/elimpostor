@@ -99,4 +99,7 @@ button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
+#pantallaModo .card {
+  margin-top: 100px;
+  text-align: center;
+}
