@@ -9,6 +9,8 @@ function irModoOnline() { mostrarPantalla("pantallaOnline"); }
 function volverSelector() { mostrarPantalla("pantallaModo"); }
 
 // ================= ONLINE =================
+let unsubscribeJugadores = null;
+
 let salaActual = null;
 let soyHost = false;
 
@@ -27,17 +29,16 @@ function crearSala() {
   db.collection("salas").doc(codigo).set({
     estado: "esperando",
     host: nombre
+  }).then(() => {
+    return db.collection("salas").doc(codigo)
+      .collection("jugadores")
+      .add({ nombre, host: true });
+  }).then(() => {
+    codigoActual.textContent = "Código: " + codigo;
+    document.getElementById("btnIniciarOnline").style.display = "block";
+    escucharJugadores();
+    escucharEstadoSala();
   });
-
-  db.collection("salas").doc(codigo)
-    .collection("jugadores")
-    .add({ nombre, host: true });
-
-  codigoActual.textContent = "Código: " + codigo;
-  document.getElementById("btnIniciarOnline").style.display = "block";
-
-  escucharJugadores();
-  escucharEstadoSala();
 }
 
 function unirseSala() {
@@ -53,23 +54,30 @@ function unirseSala() {
     salaActual = codigo;
     soyHost = false;
 
-    salaRef.collection("jugadores").add({ nombre, host: false });
-
-    codigoActual.textContent = "Sala: " + codigo;
+    return salaRef.collection("jugadores")
+      .add({ nombre, host: false });
+  }).then(() => {
+    codigoActual.textContent = "Sala: " + salaActual;
     escucharJugadores();
     escucharEstadoSala();
   });
 }
 
 function escucharJugadores() {
-  db.collection("salas").doc(salaActual)
+  if (unsubscribeJugadores) unsubscribeJugadores();
+
+  unsubscribeJugadores = db
+    .collection("salas")
+    .doc(salaActual)
     .collection("jugadores")
-    .onSnapshot(snap => {
+    .onSnapshot(snapshot => {
       listaJugadoresOnline.innerHTML = "";
-      snap.forEach(doc => {
+
+      snapshot.forEach(doc => {
         const j = doc.data();
-        listaJugadoresOnline.innerHTML +=
-          `<li>${j.nombre}${j.host ? " 👑" : ""}</li>`;
+        const li = document.createElement("li");
+        li.textContent = j.nombre + (j.host ? " 👑" : "");
+        listaJugadoresOnline.appendChild(li);
       });
     });
 }
@@ -134,3 +142,4 @@ function agregarJugador() {
 function iniciarJuego() {
   alert("Modo local OK (ya funcionaba)");
 }
+
