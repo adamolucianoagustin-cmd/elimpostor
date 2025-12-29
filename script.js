@@ -1,4 +1,4 @@
-// ================= DOM =================
+// DOM
 const nombreJugador = document.getElementById("nombreJugador");
 const listaJugadores = document.getElementById("listaJugadores");
 const contadorJugadores = document.getElementById("contadorJugadores");
@@ -6,25 +6,25 @@ const btnIniciar = document.getElementById("btnIniciar");
 const cantidadImpostores = document.getElementById("cantidadImpostores");
 const listaCategoriasInicio = document.getElementById("listaCategoriasInicio");
 
-// ================= PANTALLAS =================
+// Pantallas
 function mostrarPantalla(id) {
   document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa"));
   document.getElementById(id).classList.add("activa");
 }
-function irModoLocal() { mostrarPantalla("pantallaLocal"); }
-function irModoOnline() { mostrarPantalla("pantallaOnline"); }
-function volverSelector() { mostrarPantalla("pantallaModo"); }
+const irModoLocal = () => mostrarPantalla("pantallaLocal");
+const irModoOnline = () => mostrarPantalla("pantallaOnline");
+const volverSelector = () => mostrarPantalla("pantallaModo");
 
-// ================= JUEGO LOCAL =================
+// Juego
 let jugadores = [];
 let categorias = {};
 let categoriaSeleccionada = null;
-
 let ordenTurnos = [];
 let turnoActual = 0;
 let palabraSecreta = "";
 let roles = {};
 let votos = {};
+let cartaMostrada = false;
 
 // Categorías
 db.collection("categorias").onSnapshot(snap => {
@@ -58,54 +58,54 @@ function validarInicio() {
     cantidadImpostores.value >= jugadores.length;
 }
 
-// ================= INICIAR =================
+// Iniciar juego
 function iniciarJuego() {
   palabraSecreta = categorias[categoriaSeleccionada]
     [Math.floor(Math.random() * categorias[categoriaSeleccionada].length)];
 
   ordenTurnos = [...jugadores].sort(() => Math.random() - 0.5);
   turnoActual = 0;
-  roles = {};
   votos = {};
+  roles = {};
 
-  const mezcla = [...ordenTurnos].sort(() => Math.random() - 0.5);
-  mezcla.forEach((j, i) => {
-    roles[j] = i < cantidadImpostores.value ? "impostor" : "civil";
-  });
+  [...ordenTurnos].sort(() => Math.random() - 0.5)
+    .forEach((j, i) => roles[j] = i < cantidadImpostores.value ? "impostor" : "civil");
 
   mostrarPantallaPasar();
 }
 
-// ================= PASAR CELULAR =================
+// Pasar celular
 function mostrarPantallaPasar() {
-  const jugador = ordenTurnos[turnoActual];
   document.getElementById("textoPasar").textContent =
-    `Ahora toma el celular: ${jugador}`;
+    `Ahora toma el celular: ${ordenTurnos[turnoActual]}`;
   mostrarPantalla("pantallaPasar");
 }
 
+// Carta con doble toque
 function mostrarCarta() {
   const jugador = ordenTurnos[turnoActual];
   document.getElementById("turnoJugador").textContent = jugador;
 
   const carta = document.getElementById("cartaRol");
-  const frente = document.getElementById("frenteCarta");
-  const dorso = document.getElementById("dorsoCarta");
-  const btn = document.getElementById("btnSiguiente");
+  const textoRol = document.getElementById("textoRol");
 
-  frente.textContent = "Tocá para ver";
-  dorso.textContent =
+  textoRol.textContent =
     roles[jugador] === "impostor"
       ? "😈 SOS EL IMPOSTOR"
-      : `🧠 PALABRA: ${palabraSecreta}`;
+      : `🧠 PALABRA:\n${palabraSecreta}`;
 
   carta.classList.remove("volteada");
-  btn.style.display = "none";
+  cartaMostrada = false;
 
   carta.onclick = () => {
-    carta.classList.add("volteada");
-    btn.style.display = "block";
-    carta.onclick = null;
+    if (!cartaMostrada) {
+      carta.classList.add("volteada");
+      cartaMostrada = true;
+    } else {
+      carta.classList.remove("volteada");
+      carta.onclick = null;
+      setTimeout(siguienteJugador, 400);
+    }
   };
 
   mostrarPantalla("pantallaRol");
@@ -113,11 +113,12 @@ function mostrarCarta() {
 
 function siguienteJugador() {
   turnoActual++;
-  if (turnoActual >= ordenTurnos.length) iniciarVotacion();
-  else mostrarPantallaPasar();
+  turnoActual >= ordenTurnos.length
+    ? iniciarVotacion()
+    : mostrarPantallaPasar();
 }
 
-// ================= VOTACIÓN =================
+// Votación
 function iniciarVotacion() {
   mostrarPantalla("pantallaVotacion");
   const cont = document.getElementById("listaVotacion");
@@ -126,6 +127,7 @@ function iniciarVotacion() {
 
   jugadores.forEach(votante => {
     const div = document.createElement("div");
+    div.className = "voto-card";
     div.innerHTML = `<strong>${votante}</strong>`;
     jugadores.filter(j => j !== votante).forEach(v => {
       const b = document.createElement("button");
@@ -141,11 +143,10 @@ function iniciarVotacion() {
   });
 }
 
-// ================= RESULTADO =================
+// Resultado
 function mostrarResultado() {
   mostrarPantalla("pantallaResultado");
-  const res = document.getElementById("resultadoFinal");
-  res.innerHTML = `
+  document.getElementById("resultadoFinal").innerHTML = `
     ${Object.entries(votos).map(v => `<p>${v[0]}: ${v[1]}</p>`).join("")}
     <hr>
     <strong>Impostores:</strong>
