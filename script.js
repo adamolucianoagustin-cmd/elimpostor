@@ -8,6 +8,79 @@ function irModoOnline() {
 function volverSelector() {
   mostrarPantalla("pantallaModo");
 }
+// ---------------- ONLINE ----------------
+let salaActual = null;
+let soyHost = false;
+
+function generarCodigo() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ123456789";
+  let codigo = "";
+  for (let i = 0; i < 5; i++) {
+    codigo += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return codigo;
+}
+function crearSala() {
+  const nombre = nombreOnline.value.trim();
+  if (!nombre) return alert("Ingresá tu nombre");
+
+  const codigo = generarCodigo();
+  salaActual = codigo;
+  soyHost = true;
+
+  db.collection("salas").doc(codigo).set({
+    host: nombre,
+    estado: "esperando"
+  });
+
+  db.collection("salas").doc(codigo)
+    .collection("jugadores")
+    .add({
+      nombre,
+      host: true
+    });
+
+  codigoActual.textContent = "Código de sala: " + codigo;
+
+  escucharJugadores(codigo);
+}
+function unirseSala() {
+  const nombre = nombreOnline.value.trim();
+  const codigo = codigoSala.value.trim().toUpperCase();
+
+  if (!nombre || !codigo)
+    return alert("Completá nombre y código");
+
+  salaActual = codigo;
+  soyHost = false;
+
+  db.collection("salas").doc(codigo)
+    .collection("jugadores")
+    .add({
+      nombre,
+      host: false
+    });
+
+  codigoActual.textContent = "Sala: " + codigo;
+
+  escucharJugadores(codigo);
+}
+function escucharJugadores(codigo) {
+  db.collection("salas")
+    .doc(codigo)
+    .collection("jugadores")
+    .onSnapshot(snapshot => {
+
+      listaJugadoresOnline.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const j = doc.data();
+        const li = document.createElement("li");
+        li.textContent = j.nombre + (j.host ? " 👑" : "");
+        listaJugadoresOnline.appendChild(li);
+      });
+    });
+}
 
 // ---------------- DATOS ----------------
 let jugadores = [];
@@ -175,3 +248,4 @@ function mostrarFinal(texto) {
 function salirInicio() {
   location.reload();
 }
+
