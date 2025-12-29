@@ -9,18 +9,28 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<!-- ================= CARTA ROL ================= -->
+
+<!-- ================= PASAR CELULAR ================= -->
+<div id="pantallaPasar" class="pantalla">
+  <div class="card">
+    <h2 id="textoPasar"></h2>
+    <p>🔒 Asegurate de estar solo</p>
+    <button onclick="mostrarCarta()">Estoy listo</button>
+  </div>
+</div>
+
+<!-- ================= CARTA ================= -->
 <div id="pantallaRol" class="pantalla">
   <div class="card">
     <h2 id="turnoJugador"></h2>
 
     <div id="cartaRol" class="carta">
-      <div id="frenteCarta">Tocá para ver tu rol</div>
+      <div id="frenteCarta">Tocá para ver</div>
       <div id="dorsoCarta"></div>
     </div>
 
-    <button onclick="siguienteJugador()" id="btnSiguiente" style="display:none">
-      Siguiente
+    <button id="btnSiguiente" onclick="siguienteJugador()" style="display:none">
+      Pasar celular
     </button>
   </div>
 </div>
@@ -28,8 +38,7 @@
 <!-- ================= VOTACIÓN ================= -->
 <div id="pantallaVotacion" class="pantalla">
   <div class="card scroll">
-    <h2>Votación</h2>
-    <p>¿Quién creés que es el impostor?</p>
+    <h2>🗳️ Votación</h2>
     <div id="listaVotacion"></div>
   </div>
 </div>
@@ -39,7 +48,7 @@
   <div class="card scroll">
     <h2>Resultado final</h2>
     <div id="resultadoFinal"></div>
-    <button onclick="volverSelector()">🔁 Volver al inicio</button>
+    <button onclick="volverSelector()">🔁 Volver</button>
   </div>
 </div>
 
@@ -47,7 +56,6 @@
 <div id="pantallaModo" class="pantalla activa">
   <div class="card">
     <h1>Juego del Impostor</h1>
-    <p>Elegí cómo querés jugar</p>
     <button onclick="irModoLocal()">🧍 Modo Local</button>
     <button onclick="irModoOnline()">🌐 Modo Online</button>
   </div>
@@ -59,49 +67,31 @@
     <h2>Modo Local</h2>
 
     <input id="nombreJugador" placeholder="Nombre del jugador">
-    <button onclick="agregarJugador()">Agregar jugador</button>
+    <button onclick="agregarJugador()">Agregar</button>
 
     <p id="contadorJugadores">Jugadores: 0</p>
 
-    <h3>Impostores</h3>
     <select id="cantidadImpostores">
       <option value="1">1 impostor</option>
       <option value="2">2 impostores</option>
     </select>
 
-    <h3>Categoría</h3>
-    <div id="listaCategoriasInicio" class="categorias"></div>
+    <div id="listaCategoriasInicio"></div>
 
     <button id="btnIniciar" onclick="iniciarJuego()" disabled>
       Iniciar juego
     </button>
 
     <ul id="listaJugadores"></ul>
-
     <button onclick="volverSelector()">⬅ Volver</button>
   </div>
 </div>
 
-<!-- ================= ONLINE ================= -->
+<!-- ================= ONLINE (SIN TOCAR) ================= -->
 <div id="pantallaOnline" class="pantalla">
-  <div class="card scroll">
+  <div class="card">
     <h2>Modo Online</h2>
-
-    <input id="nombreOnline" placeholder="Tu nombre">
-    <button onclick="crearSala()">➕ Crear sala</button>
-
-    <input id="codigoSala" placeholder="Código de sala">
-    <button onclick="unirseSala()">🔑 Unirse a sala</button>
-
-    <p id="codigoActual"></p>
-
-    <h3>Jugadores en la sala</h3>
-    <ul id="listaJugadoresOnline"></ul>
-
-    <button id="btnIniciarOnline" onclick="iniciarJuegoOnline()" style="display:none">
-      🚀 Iniciar juego
-    </button>
-
+    <p>En desarrollo</p>
     <button onclick="volverSelector()">⬅ Volver</button>
   </div>
 </div>
@@ -122,4 +112,3 @@ const db = firebase.firestore();
 <script src="script.js"></script>
 </body>
 </html>
-
