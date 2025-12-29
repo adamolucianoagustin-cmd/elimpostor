@@ -9,20 +9,65 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- SELECTOR DE MODO -->
+<div id="pantallaModo" class="pantalla activa">
+  <div class="card">
+    <h1>Juego del Impostor</h1>
+    <p>Elegí cómo querés jugar</p>
 
-<div id="pantallaInicio" class="pantalla activa">
+    <button onclick="irModoLocal()">🧍 Modo Local</button>
+    <button onclick="irModoOnline()">🌐 Modo Online</button>
+  </div>
+</div>
+
+<div id="pantallaLocal" class="pantalla">
+  <div id="pantallaInicio" class="pantalla activa">
+  </div>
+</div>
+  
   <div class="card scroll">
     <h1>Juego del Impostor</h1>
 
     <button onclick="seleccionarModo('local')">Modo local</button>
     <button onclick="seleccionarModo('online')">Modo online</button>
+    
+<!-- MODO ONLINE -->
+<div id="pantallaOnline" class="pantalla">
+  <div class="card scroll">
+    <h2>Modo Online</h2>
 
-    <div id="bloqueOnline" style="display:none">
-      <button onclick="crearSala()">Crear sala</button>
-      <input id="codigoSala" placeholder="Código de sala">
-      <button onclick="unirseSala()">Unirse</button>
-      <p id="codigoActual"></p>
-    </div>
+    <h3>Tu nombre</h3>
+    <input id="nombreOnline" placeholder="Tu nombre">
+
+    <h3>Sala</h3>
+    <button onclick="crearSala()">Crear sala</button>
+
+    <input id="codigoSala" placeholder="Código de sala">
+    <button onclick="unirseSala()">Unirse a sala</button>
+
+    <p id="codigoActual"></p>
+
+    <hr>
+
+    <h3>Jugadores en la sala</h3>
+    <ul id="listaJugadoresOnline"></ul>
+
+    <hr>
+
+    <h3>Categoría</h3>
+    <div id="listaCategoriasOnline" class="categorias"></div>
+
+    <h3>Impostores</h3>
+    <select id="cantidadImpostoresOnline">
+      <option value="1">1 impostor</option>
+      <option value="2">2 impostores</option>
+    </select>
+
+    <button onclick="iniciarJuegoOnline()">Iniciar juego</button>
+
+    <button onclick="volverSelector()">⬅ Volver</button>
+  </div>
+</div>
 
     <input id="nombreJugador" placeholder="Nombre del jugador">
     <button onclick="agregarJugador()">Agregar jugador</button>
@@ -97,3 +142,4 @@ const db = firebase.firestore();
 <script src="script.js"></script>
 </body>
 </html>
+
