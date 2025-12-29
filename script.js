@@ -1,3 +1,15 @@
+function irModoLocal() {
+  mostrarPantalla("pantallaLocal");
+}
+
+function irModoOnline() {
+  mostrarPantalla("pantallaOnline");
+}
+
+function volverSelector() {
+  mostrarPantalla("pantallaModo");
+}
+
 let modo = "local";
 
 let jugadores = [];
@@ -186,3 +198,4 @@ function mostrarFinal(texto) {
 function salirInicio() {
   location.reload();
 }
+
