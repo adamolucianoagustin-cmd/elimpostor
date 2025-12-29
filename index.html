@@ -9,6 +9,39 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<!-- ================= CARTA ROL ================= -->
+<div id="pantallaRol" class="pantalla">
+  <div class="card">
+    <h2 id="turnoJugador"></h2>
+
+    <div id="cartaRol" class="carta">
+      <div id="frenteCarta">Tocá para ver tu rol</div>
+      <div id="dorsoCarta"></div>
+    </div>
+
+    <button onclick="siguienteJugador()" id="btnSiguiente" style="display:none">
+      Siguiente
+    </button>
+  </div>
+</div>
+
+<!-- ================= VOTACIÓN ================= -->
+<div id="pantallaVotacion" class="pantalla">
+  <div class="card scroll">
+    <h2>Votación</h2>
+    <p>¿Quién creés que es el impostor?</p>
+    <div id="listaVotacion"></div>
+  </div>
+</div>
+
+<!-- ================= RESULTADO ================= -->
+<div id="pantallaResultado" class="pantalla">
+  <div class="card scroll">
+    <h2>Resultado final</h2>
+    <div id="resultadoFinal"></div>
+    <button onclick="volverSelector()">🔁 Volver al inicio</button>
+  </div>
+</div>
 
 <!-- ================= SELECTOR ================= -->
 <div id="pantallaModo" class="pantalla activa">
@@ -89,3 +122,4 @@ const db = firebase.firestore();
 <script src="script.js"></script>
 </body>
 </html>
+
