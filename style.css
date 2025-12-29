@@ -1,104 +1,114 @@
 html, body {
-  height: 100%; 
+  height: 100%;
   margin: 0;
-  background: radial-gradient(circle at top, #3b2d6f, #0e0b1f); 
-  font-family: 'Cinzel', serif; 
+  background: radial-gradient(circle at top, #3b2d6f, #0e0b1f);
+  font-family: 'Cinzel', serif;
   color: white;
-} 
-* { box-sizing: border-box; } 
-.pantalla { 
-  position: fixed; 
-  inset: 0; 
-  display: flex; 
-  justify-content: center; 
-  align-items: flex-start; 
-  padding-top: 30px; 
-  opacity: 0; 
-  pointer-events: none; 
-  transition: opacity .4s; } 
-.pantalla.activa { 
-  opacity: 1; 
+}
+* { box-sizing: border-box; }
+
+.pantalla {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 30px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .4s;
+}
+.pantalla.activa {
+  opacity: 1;
   pointer-events: all;
-} 
-.card { 
+}
+
+.card {
   width: 90%;
-  max-width: 420px; 
-  background: rgba(20,18,40,.9); 
-  border-radius: 18px; 
+  max-width: 420px;
+  background: rgba(20,18,40,.95);
+  border-radius: 18px;
   padding: 25px;
-} 
-.scroll { 
+}
+
+.scroll {
   max-height: calc(100vh - 60px);
   overflow-y: auto;
-} 
-button, input, select { 
+}
+
+button, input, select {
   width: 100%;
   margin-top: 12px;
   padding: 14px;
   border-radius: 12px;
   border: none;
-} 
-button { 
+}
+
+button {
   background: linear-gradient(135deg,#7f5af0,#5ddcff);
   font-weight: bold;
   cursor: pointer;
-} 
-.categorias { 
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-} 
-.categoria-btn { 
-  background: rgba(255,255,255,.15);
-  color: white;
-} 
-.categoria-btn.activa {
-  background: linear-gradient(135deg,#00ffcc,#00b894);
-  color: #0e0b1f;
-} /* CARTA */ 
-.carta { 
-  height: 220px; 
-  perspective: 1000px;
-  position: relative;
 }
+
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* ================= CARTA (FIX MOBILE) ================= */
+.carta {
+  height: 240px;
+  perspective: 1200px;
+  position: relative;
+  cursor: pointer;
+  transform-style: preserve-3d;
+}
+
 .cara {
   position: absolute;
   width: 100%;
   height: 100%;
   border-radius: 18px;
-  display: flex; 
+  display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
   padding: 20px;
   backface-visibility: hidden;
-  transition: transform .8s;
+  -webkit-backface-visibility: hidden;
+  transition: transform .7s;
   white-space: pre-line;
-} 
-.frente { 
+  font-size: 1.3em;
+}
+
+.frente {
   background: #2d2a55;
-} 
-.dorso { 
+  transform: rotateY(0deg);
+}
+
+.dorso {
   background: linear-gradient(135deg,#7f5af0,#5ddcff);
   transform: rotateY(180deg);
-} 
+}
+
+/* FLIP REAL (NO 360) */
 .carta.volteada .frente {
-  transform: rotateY(180deg);
-} 
-.carta.volteada .dorso { 
-  transform: rotateY(360deg);
-} /* VOTACIÓN */ 
-.voto-card { 
+  transform: rotateY(-180deg);
+}
+.carta.volteada .dorso {
+  transform: rotateY(0deg);
+}
+
+/* VOTACIÓN */
+.voto-card {
   padding: 18px;
   border-radius: 16px;
   background: rgba(255,255,255,.15);
-  margin-top: 12px; 
-  text-align: center; cursor: pointer;
+  margin-top: 12px;
+  text-align: center;
+  cursor: pointer;
 }
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+
 #pantallaModo .card {
   margin-top: 100px;
   text-align: center;
