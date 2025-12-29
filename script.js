@@ -51,20 +51,27 @@ function unirseSala() {
   if (!nombre || !codigo)
     return alert("Completá nombre y código");
 
-  salaActual = codigo;
-  soyHost = false;
+  const salaRef = db.collection("salas").doc(codigo);
 
-  db.collection("salas").doc(codigo)
-    .collection("jugadores")
-    .add({
+  salaRef.get().then(doc => {
+    if (!doc.exists) {
+      alert("La sala no existe");
+      return;
+    }
+
+    salaActual = codigo;
+    soyHost = false;
+
+    salaRef.collection("jugadores").add({
       nombre,
       host: false
     });
 
-  codigoActual.textContent = "Sala: " + codigo;
-
-  escucharJugadores(codigo);
+    codigoActual.textContent = "Sala: " + codigo;
+    escucharJugadores(codigo);
+  });
 }
+
 function escucharJugadores(codigo) {
   db.collection("salas")
     .doc(codigo)
@@ -248,4 +255,5 @@ function mostrarFinal(texto) {
 function salirInicio() {
   location.reload();
 }
+
 
