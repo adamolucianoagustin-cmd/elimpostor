@@ -1,31 +1,28 @@
+// ---------------- MODO ----------------
 function irModoLocal() {
   mostrarPantalla("pantallaLocal");
 }
-
 function irModoOnline() {
   mostrarPantalla("pantallaOnline");
 }
-
 function volverSelector() {
   mostrarPantalla("pantallaModo");
 }
 
-let modo = "local";
-
+// ---------------- DATOS ----------------
 let jugadores = [];
 let jugadoresVivos = [];
 let categorias = {};
 let categoriaSeleccionada = null;
-
 let roles = {};
 let palabra = "";
 
-// LOCAL
+// carta
 let ordenRolesLocal = [];
 let indiceRolLocal = 0;
 let cartaAbierta = false;
 
-// TIMER
+// timer
 let tiempo = 180;
 let intervalo;
 
@@ -33,17 +30,6 @@ let intervalo;
 function mostrarPantalla(id) {
   document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa"));
   document.getElementById(id).classList.add("activa");
-}
-
-// ---------------- MODO ----------------
-function seleccionarModo(m) {
-  modo = m;
-  jugadores = [];
-  jugadoresVivos = [];
-  listaJugadores.innerHTML = "";
-  contadorJugadores.textContent = "Jugadores: 0";
-  validarInicio();
-  bloqueOnline.style.display = m === "online" ? "block" : "none";
 }
 
 // ---------------- CATEGORÍAS ----------------
@@ -89,7 +75,7 @@ function agregarJugador() {
   validarInicio();
 }
 
-// ---------------- INICIAR JUEGO ----------------
+// ---------------- INICIAR ----------------
 function iniciarJuego() {
   const cant = parseInt(cantidadImpostores.value);
   const mix = [...jugadores].sort(() => Math.random() - 0.5);
@@ -107,7 +93,7 @@ function iniciarJuego() {
   mostrarCartaJugador();
 }
 
-// ---------------- CARTA LOCAL ----------------
+// ---------------- CARTA ----------------
 function mostrarCartaJugador() {
   cartaAbierta = false;
   mostrarPantalla("pantallaRol");
@@ -159,23 +145,14 @@ function irAVotacion() {
   ).join("");
 }
 
-// ---------------- LÓGICA DE VOTO ----------------
 function procesarVoto(votado) {
-  const esImpostor = roles[votado] === "impostor";
   jugadoresVivos = jugadoresVivos.filter(j => j !== votado);
 
-  const impostoresVivos = jugadoresVivos.filter(j => roles[j] === "impostor");
-  const civilesVivos = jugadoresVivos.filter(j => roles[j] === "civil");
+  if (!jugadoresVivos.some(j => roles[j] === "impostor"))
+    return mostrarFinal("¡Civiles ganaron! 🎉");
 
-  if (impostoresVivos.length === 0) {
-    mostrarFinal("¡Civiles ganaron! 🎉");
-    return;
-  }
-
-  if (civilesVivos.length === 0) {
-    mostrarFinal("¡Impostores ganaron! 😈");
-    return;
-  }
+  if (!jugadoresVivos.some(j => roles[j] === "civil"))
+    return mostrarFinal("¡Impostores ganaron! 😈");
 
   iniciarDiscusion();
 }
@@ -184,10 +161,10 @@ function procesarVoto(votado) {
 function mostrarFinal(texto) {
   resultadoTexto.textContent = texto;
 
-  let detalle = "<strong>Roles finales:</strong><br><br>";
-  Object.entries(roles).forEach(([j,r]) => {
-    detalle += `${j} → ${r === "impostor" ? "Impostor 😈" : "Civil"}<br>`;
-  });
+  let detalle = "<strong>Roles:</strong><br><br>";
+  Object.entries(roles).forEach(([j,r]) =>
+    detalle += `${j} → ${r === "impostor" ? "Impostor 😈" : "Civil"}<br>`
+  );
 
   detalle += `<br><strong>Palabra:</strong> "${palabra}"`;
   detalleFinal.innerHTML = detalle;
@@ -198,4 +175,3 @@ function mostrarFinal(texto) {
 function salirInicio() {
   location.reload();
 }
-
