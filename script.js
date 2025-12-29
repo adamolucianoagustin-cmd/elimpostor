@@ -17,7 +17,6 @@ function mostrarPantalla(id) {
   document.querySelectorAll(".pantalla").forEach(p => p.classList.remove("activa"));
   document.getElementById(id).classList.add("activa");
 }
-
 function irModoLocal() { mostrarPantalla("pantallaLocal"); }
 function irModoOnline() { mostrarPantalla("pantallaOnline"); }
 function volverSelector() { mostrarPantalla("pantallaModo"); }
@@ -33,7 +32,10 @@ function generarCodigo() {
 
 function crearSala() {
   const nombre = nombreOnline.value.trim();
-  if (!nombre) return alert("Ingresá tu nombre");
+  if (!nombre) {
+    alert("Ingresá tu nombre");
+    return;
+  }
 
   const codigo = generarCodigo();
   salaActual = codigo;
@@ -41,42 +43,63 @@ function crearSala() {
 
   db.collection("salas").doc(codigo).set({
     estado: "esperando",
-    host: nombre
-  }).then(() => {
-    return db.collection("salas").doc(codigo)
+    creada: Date.now()
+  })
+  .then(() => {
+    return db.collection("salas")
+      .doc(codigo)
       .collection("jugadores")
-      .add({ nombre, host: true });
-  }).then(() => {
-    codigoActual.textContent = "Código: " + codigo;
+      .add({
+        nombre,
+        host: true
+      });
+  })
+  .then(() => {
+    codigoActual.textContent = "Código de sala: " + codigo;
     btnIniciarOnline.style.display = "block";
     escucharJugadores();
     escucharEstadoSala();
+  })
+  .catch(err => {
+    console.error("ERROR CREAR SALA:", err);
+    alert("Error creando sala. Revisá Firestore.");
   });
 }
 
 function unirseSala() {
   const nombre = nombreOnline.value.trim();
   const codigo = codigoSala.value.trim().toUpperCase();
-  if (!nombre || !codigo) return alert("Completá todo");
+  if (!nombre || !codigo) {
+    alert("Completá nombre y código");
+    return;
+  }
 
   const salaRef = db.collection("salas").doc(codigo);
 
-  salaRef.get().then(doc => {
-    if (!doc.exists) throw "La sala no existe";
-    salaActual = codigo;
-    soyHost = false;
-    return salaRef.collection("jugadores").add({ nombre, host: false });
-  }).then(() => {
-    codigoActual.textContent = "Sala: " + salaActual;
-    escucharJugadores();
-    escucharEstadoSala();
-  }).catch(e => alert(e));
+  salaRef.get()
+    .then(doc => {
+      if (!doc.exists) throw "La sala no existe";
+      salaActual = codigo;
+      soyHost = false;
+      return salaRef.collection("jugadores")
+        .add({ nombre, host: false });
+    })
+    .then(() => {
+      codigoActual.textContent = "Sala: " + salaActual;
+      escucharJugadores();
+      escucharEstadoSala();
+    })
+    .catch(err => {
+      console.error("ERROR UNIRSE:", err);
+      alert(err);
+    });
 }
 
 function escucharJugadores() {
   if (unsubscribeJugadores) unsubscribeJugadores();
 
-  unsubscribeJugadores = db.collection("salas")
+  unsubscribeJugadores = db
+    .collection("salas")
     .doc(salaActual)
     .collection("jugadores")
     .onSnapshot(snapshot => {
@@ -92,7 +115,8 @@ function escucharJugadores() {
 
 function iniciarJuegoOnline() {
   if (!soyHost) return;
-  db.collection("salas").doc(salaActual).update({ estado: "jugando" });
+  db.collection("salas").doc(salaActual)
+    .update({ estado: "jugando" });
 }
 
 function escucharEstadoSala() {
@@ -138,7 +162,6 @@ function validarInicio() {
 function agregarJugador() {
   const nombre = nombreJugador.value.trim();
   if (!nombre) return;
-
   jugadores.push(nombre);
   nombreJugador.value = "";
   listaJugadores.innerHTML = jugadores.map(j => `<li>${j}</li>`).join("");
@@ -147,6 +170,5 @@ function agregarJugador() {
 }
 
 function iniciarJuego() {
-  // 👇 acá después conectamos con el reparto real
   alert("🎴 Juego local iniciado correctamente");
 }
